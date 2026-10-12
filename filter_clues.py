@@ -9,7 +9,7 @@ Rules:
   * cap at 8 clues per word, keeping the 8 most recent
   * drop any word left with fewer than 4 clues
 
-Usage: python3 filter_clues_v3.py <input.tsv> <output.json>
+Usage: python3 filter_clues_v4.py <input.tsv> <output.json>
 """
 import sys
 import json
@@ -25,19 +25,45 @@ YEARS_BACK = 4
 LETTERS_ONLY = re.compile(r'^[A-Z]+$')
 
 # Clues that only make sense with the original grid in front of you.
-# A number must sit next to "across"/"down" -- a bare match would throw out
-# ordinary English like "Chowed down (on)" or "Dam across the Nile".
+#
+# These rules target self-REFERENCE, not crossword vocabulary. Words like
+# "row", "column", "square", "letter" and "answer" are overwhelmingly
+# innocent in clue text ("Wall calendar row", "Budget column", "Diez
+# squared", "Wrong answer"), so banning them outright would discard
+# hundreds of good clues. Likewise a digit must sit beside across/down --
+# "Chowed down (on)" and "Dam across the Nile" must survive.
+NUM = r'(?:two|three|four|five|six|seven|eight|nine|ten|\d+)'
+UNIT = r'(?:answers?|entr(?:y|ies)|clues?)'
+
 PUZZLE_REF = re.compile(
     r'''
-      \b\d+\s*[-/ ]?\s*(?:across|down)\b   # 71-Across, 3 Down, 17-/18-Across
-    | \b(?:across|down)\s+answers?\b       # "the ends of three Down answers"
-    | \b(?:this|the)\s+(?:puzzle|grid)\b   # "a hint to this puzzle's theme"
+    # --- grid cross-references ---
+      \b\d+\s*[-/ ]?\s*(?:across|down)\b    # 71-Across, 3 Down, See 12-Down
+    | \b(?:across|down)\s+''' + UNIT + r'''
+
+    # --- pointing at itself or its neighbours ---
+    | \bthis\s+(?:clue|answer|entry|puzzle|grid)\b
+    | \bthese\s+clues\b
+    | \bthis\s+list\s+of\s+clues\b
     | \bpuzzle'?s\b
-    | \b(?:circled|shaded|starred|highlighted)\s+
+    | \btoday'?s\s+(?:puzzle|theme)\b
+
+    # --- "the four longest answers" and friends ---
+    | \b''' + NUM + r'''\s+(?:longest|shortest)\s+''' + UNIT + r'''
+    | \bthe\s+(?:other|remaining|preceding|following)\s+''' + UNIT + r'''
+    | \bthe\s+answers?\s+to\s+the\b
+    | \b(?:the|these)\s+clues\b
+    | \b(?:each|every)\s+(?:of\s+the\s+)?''' + UNIT + r'''
+    | \bends?\s+of\s+(?:the\s+)?''' + NUM + r'''\s+''' + UNIT + r'''
+
+    # --- typographic callouts to other squares ---
+    | \b(?:circled|shaded|starred|highlighted|capitalized|italicized|boldfaced)\s+
         (?:letters?|squares?|clues?|answers?|entries|entry|boxes)\b
     | \btheme\s+(?:of\s+this|answers?|entr(?:y|ies))\b
     | \bhint\s+to\b
     | \bsee\s+(?:the\s+)?note\b
+    | \bclue\s+(?:number|list)\b
+    | \bin\s+the\s+clue\b
     ''',
     re.I | re.X,
 )
@@ -137,6 +163,6 @@ def process(input_path, output_path):
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print("Usage: python3 filter_clues_v3.py <input.tsv> <output.json>")
+        print("Usage: python3 filter_clues_v4.py <input.tsv> <output.json>")
         sys.exit(1)
     process(sys.argv[1], sys.argv[2])

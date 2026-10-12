@@ -22,7 +22,7 @@ A single JSON object, keys sorted, mapping an uppercase answer to its clues
 
 ## Filter rules
 
-Built from 9,981,797 corpus rows; 749,051 survived filtering.
+Built from 9,981,797 corpus rows; 748,740 survived filtering.
 
 - answer is `A-Z` only — drops numeric and mixed answers from meta-puzzle sources
 - answer length is 3, 4, or 5
@@ -32,21 +32,28 @@ Built from 9,981,797 corpus rows; 749,051 survived filtering.
 - at most 8 clues per word, keeping the 8 most recent
 - words left with fewer than 4 clues are dropped
 
-Result: **16,766 unique words** and 126,023 clues — 2,430 words of length 3,
-5,511 of length 4, 8,825 of length 5. 13,798 words (82%) sit at the 8-clue cap.
+Result: **16,765 unique words** and 126,016 clues — 2,430 words of length 3,
+5,510 of length 4, 8,825 of length 5. 13,797 words (82%) sit at the 8-clue cap.
 
 ### Puzzle-internal clues
 
-11,866 clues were discarded for only making sense with the original grid in
-front of you: cross-references like `71-Across` and `See 12-Down`, "a hint to
-this puzzle's theme", circled / shaded / starred letters and squares, and "the
-ends of three Down answers".
+12,210 clues were discarded for only making sense with the original grid in
+front of you:
 
-A digit must sit beside "across" or "down" for the rule to fire. Every clue that
-mentions those words without a number is ordinary English — "Chowed down (on)",
-"Dam across the Nile" — and is kept. "Starred" likewise only trips next to
-letters, squares, clues or answers, so "Jacobson who starred in 'A League of
-Their Own'" survives.
+- cross-references — `71-Across`, `See 12-Down`
+- self-reference — "Like this clue", "What the eight longest answers share",
+  "hidden in this clue", "This clue number x 2"
+- typographic callouts — circled, shaded, starred, capitalized letters and
+  squares; "a hint to this puzzle's theme"
+
+The rules target self-*reference*, not crossword vocabulary. Words like `row`,
+`column`, `square`, `letter` and `answer` are overwhelmingly innocent in clue
+text — "Wall calendar row", "Budget column", "Diez squared", "Wrong answer" —
+so banning them outright would discard hundreds of good clues. A digit must sit
+beside "across" or "down", which keeps "Chowed down (on)" and "Dam across the
+Nile"; "starred" only trips next to letters/squares/clues/answers, which keeps
+"Jacobson who starred in 'A League of Their Own'"; and "each" is scoped to
+answers and clues, which keeps "One of five in each line of a sonnet".
 
 Filtering happens per source row, before the per-word cap, so a word that loses
 a clue backfills with its next-best real one.
