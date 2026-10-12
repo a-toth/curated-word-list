@@ -7,8 +7,8 @@
 
 | File | Size | Notes |
 | --- | --- | --- |
-| `clues_filtered.json` | 3.60 MB | word → array of clue strings |
-| `clues_filtered.json.gz` | 1.47 MB | gzip -9 of the above, identical contents |
+| `clues_filtered.json` | 3.83 MB | word → array of 15 clue strings |
+| `clues_filtered.json.gz` | 1.55 MB | gzip -9 of the above, identical contents |
 | `filter_clues.py` | — | the script that builds them from `clues.tsv` |
 
 ## Format
@@ -17,27 +17,45 @@ A single JSON object, keys sorted, mapping an uppercase answer to its clues
 (most recent first):
 
 ```json
-{"GRASP":["Clutch","Fully understand","Hold firmly"]}
+{"GRASP":["Clutch firmly","Comprehend","Grab hold of","Wrap one's head around"]}
 ```
 
 ## Filter rules
 
-Built from 9,981,797 corpus rows; 748,643 survived filtering.
+Built from 9,981,797 corpus rows; 1,054,602 survived filtering.
 
 - answer is `A-Z` only — drops numeric and mixed answers from meta-puzzle sources
 - answer length is 3, 4, or 5
-- clue's puzzle year is within the last 4 years (>= 2022)
+- clue's puzzle year is within the last 7 years (>= 2019)
 - puzzle-internal clues are discarded (see below)
 - exact-duplicate clue text per word is deduped
-- at most 8 clues per word, keeping the 8 most recent
-- words left with fewer than 4 clues are dropped
+- a word needs **at least 30 unique clue texts** to qualify — distinct clues,
+  not raw appearances
+- the 15 most recent clues are kept
 
-Result: **16,765 unique words** and 126,015 clues — 2,430 words of length 3,
-5,510 of length 4, 8,825 of length 5. 13,797 words (82%) sit at the 8-clue cap.
+Result: **9,073 unique words** and 136,095 clues — 1,643 words of length 3,
+3,465 of length 4, 3,965 of length 5. Every word carries a full 15 clues.
+
+### Why 30
+
+The threshold is a popularity filter, and it does not cut evenly across
+lengths: short crosswordese is clued far more often than ordinary 5-letter
+words. At a 150-clue minimum only 196 five-letter words survive — too thin to
+fill a 5×5 grid without heavy repetition. At 30 the pool is 3,965. Measured
+counts at 2019+ with all filters applied:
+
+| min clues | total | len 3 | len 4 | len 5 |
+| ---: | ---: | ---: | ---: | ---: |
+| 150 | 1,599 | 680 | 723 | 196 |
+| 100 | 2,914 | 963 | 1,369 | 582 |
+| 60 | 5,213 | 1,287 | 2,343 | 1,583 |
+| **30** | **9,073** | **1,643** | **3,465** | **3,965** |
+| 15 | 12,705 | 2,007 | 4,388 | 6,310 |
+| 10 | 14,517 | 2,181 | 4,890 | 7,446 |
 
 ### Puzzle-internal clues
 
-12,307 clues were discarded for only making sense with the original grid in
+18,954 clues were discarded for only making sense with the original grid in
 front of you:
 
 - cross-references — `71-Across`, `See 12-Down`, `27-Downs`
@@ -51,10 +69,11 @@ The rules target self-*reference*, not crossword vocabulary. Words like `row`,
 `column`, `square`, `letter` and `answer` are overwhelmingly innocent in clue
 text — "Wall calendar row", "Budget column", "Diez squared", "Wrong answer" —
 so banning them outright would discard hundreds of good clues. A digit must sit
-beside "across" or "down", which keeps "Chowed down (on)" and "Dam across the
-Nile"; "starred" only trips next to letters/squares/clues/answers, which keeps
-"Jacobson who starred in 'A League of Their Own'"; and "each" is scoped to
-answers and clues, which keeps "One of five in each line of a sonnet".
+beside "across" or "down", which keeps "Chowed down (on)", "Dam across the
+Nile" and "Tony of 10 Downing St."; "starred" only trips next to
+letters/squares/clues/answers, which keeps "Jacobson who starred in 'A League
+of Their Own'"; and "each" is scoped to answers and clues, which keeps "One of
+five in each line of a sonnet".
 
 Filtering happens per source row, before the per-word cap, so a word that loses
 a clue backfills with its next-best real one.

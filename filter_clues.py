@@ -19,9 +19,9 @@ from collections import defaultdict
 
 MIN_LEN = 3
 MAX_LEN = 5
-MAX_CLUES_PER_WORD = 8
-MIN_CLUES_PER_WORD = 4
-YEARS_BACK = 4
+MAX_CLUES_PER_WORD = 15
+MIN_CLUES_PER_WORD = 30
+YEARS_BACK = 7
 LETTERS_ONLY = re.compile(r'^[A-Z]+$')
 
 # Clues that only make sense with the original grid in front of you.
