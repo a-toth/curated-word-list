@@ -7,8 +7,8 @@
 
 | File | Size | Notes |
 | --- | --- | --- |
-| `clues_filtered.json` | 4.94 MB | word → array of clue strings |
-| `clues_filtered.json.gz` | 2.04 MB | gzip -9 of the above, identical contents |
+| `clues_filtered.json` | 4.73 MB | word → array of clue strings |
+| `clues_filtered.json.gz` | 1.92 MB | gzip -9 of the above, identical contents |
 
 ## Format
 
@@ -21,24 +21,24 @@ A single JSON object, keys sorted, mapping an uppercase answer to its clues
 
 ## Filter rules
 
-Built from 9,981,797 corpus rows; 2,383,709 survived filtering.
+Built from 9,981,797 corpus rows; 1,476,527 survived filtering.
 
 - answer is `A-Z` only — drops numeric and mixed answers from meta-puzzle sources
 - answer length is 3, 4, or 5
-- clue's puzzle year is within the last 30 years (>= 1996)
+- clue's puzzle year is within the last 12 years (>= 2014)
 - exact-duplicate clue text per word is deduped
-- at most 6 clues per word, keeping the most recent
+- at most 8 clues per word, keeping the most recent
+- words left with fewer than 3 clues are dropped
 
-Result: **36,220 unique words** — 4,501 of length 3, 11,379 of length 4,
-20,340 of length 5.
+Result: **21,543 unique words** and 158,193 clues — 2,896 words of length 3,
+6,874 of length 4, 11,773 of length 5. 17,380 words (81%) sit at the 8-clue cap.
 
 ## Serving the `.gz`
 
 If you serve the pre-compressed file directly, send both
 `Content-Encoding: gzip` and `Content-Type: application/json`, or the browser
 will hand your code raw gzip bytes. Most CDNs compress the plain `.json` on the
-fly anyway (Brotli lands around 1.54 MB), so the plain file is often the simpler
-choice.
+fly anyway, so the plain file is often the simpler choice.
 
 ## Source and licensing
 
