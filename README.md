@@ -22,7 +22,7 @@ A single JSON object, keys sorted, mapping an uppercase answer to its clues
 
 ## Filter rules
 
-Built from 9,981,797 corpus rows; 748,740 survived filtering.
+Built from 9,981,797 corpus rows; 748,656 survived filtering.
 
 - answer is `A-Z` only — drops numeric and mixed answers from meta-puzzle sources
 - answer length is 3, 4, or 5
@@ -32,15 +32,15 @@ Built from 9,981,797 corpus rows; 748,740 survived filtering.
 - at most 8 clues per word, keeping the 8 most recent
 - words left with fewer than 4 clues are dropped
 
-Result: **16,765 unique words** and 126,016 clues — 2,430 words of length 3,
+Result: **16,765 unique words** and 126,015 clues — 2,430 words of length 3,
 5,510 of length 4, 8,825 of length 5. 13,797 words (82%) sit at the 8-clue cap.
 
 ### Puzzle-internal clues
 
-12,210 clues were discarded for only making sense with the original grid in
+12,294 clues were discarded for only making sense with the original grid in
 front of you:
 
-- cross-references — `71-Across`, `See 12-Down`
+- cross-references — `71-Across`, `See 12-Down`, `27-Downs`
 - self-reference — "Like this clue", "What the eight longest answers share",
   "hidden in this clue", "This clue number x 2"
 - typographic callouts — circled, shaded, starred, capitalized letters and

@@ -38,8 +38,8 @@ UNIT = r'(?:answers?|entr(?:y|ies)|clues?)'
 PUZZLE_REF = re.compile(
     r'''
     # --- grid cross-references ---
-      \b\d+\s*[-/ ]?\s*(?:across|down)\b    # 71-Across, 3 Down, See 12-Down
-    | \b(?:across|down)\s+''' + UNIT + r'''
+      \b\d+\s*[-/ ]?\s*(?:acrosse?s?|downs?)\b   # 71-Across, 3 Down, 27-Downs
+    | \b(?:acrosse?s?|downs?)\s+''' + UNIT + r'''
 
     # --- pointing at itself or its neighbours ---
     | \bthis\s+(?:clue|answer|entry|puzzle|grid)\b
