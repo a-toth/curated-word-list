@@ -61,7 +61,8 @@ PUZZLE_REF = re.compile(
         (?:letters?|squares?|clues?|answers?|entries|entry|boxes)\b
     | \btheme\s+(?:of\s+this|answers?|entr(?:y|ies))\b
     | \bhint\s+to\b
-    | \bsee\s+(?:the\s+)?note\b
+    | \bsee\s+(?:the\s+)?(?:note|notepad|title|instructions)\b
+    | \bclued\s+elsewhere\b
     | \bclue\s+(?:number|list)\b
     | \bin\s+the\s+clue\b
     ''',
