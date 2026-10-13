@@ -1,0 +1,54 @@
+Prune this crossword word→clues JSON for a standalone word game (no grid, no crossing letters).
+
+## Goal
+Players see one clue and must find the answer with no other help. Keep a clue only if a typical solver would both:
+1. solve it from the clue alone, and
+2. recognize the answer as a real, familiar word or phrase.
+If either fails, delete the clue. The aim is a clue bank that feels fair and familiar, not one that rewards crossword-insider knowledge.
+
+## Solver
+A typical American adult who does Monday–Wednesday NYT crosswords. Knows mainstream pop culture, common idioms, everyday objects, and school-level facts. Is not a specialist and does not follow niche scenes.
+
+## Keep a clue when it uses
+- common idioms or everyday phrases
+- well-known movies, songs, brands, or mainstream TV
+- widely taught school-level facts
+- a plain synonym or definition of a familiar word
+- light, guessable wordplay a Monday solver would get (e.g. "It's spent on Nice things?" for EURO)
+
+## Remove a clue when it needs
+- niche hobbies, sports stats, or brands known only within one industry
+- regional or local references (UK-only slang, obscure places, one-off venues)
+- professional or academic jargon
+- opera, classical, or specialist arts terms
+- celebrities or brands that were famous only briefly or in one scene
+- deep cuts: album titles, B-sides, Reddit or Twitter memes, "tonight" or other time-bound events
+- a fill-in-the-blank built on an obscure title or quote
+- heavy wordplay that is unfair without crossing letters
+- an abbreviation or foreign word the clue doesn't clearly signal
+
+When unsure about a clue, remove it.
+
+## Remove a whole word when
+The answer itself is obscure or crosswordese that the solver wouldn't recognize as familiar (e.g. ANI, SAO). When unsure about a word, keep it.
+Never drop a word just because few clues remain. Omit a word only if the answer is unfamiliar or every one of its clues was removed.
+
+## Examples
+- APED: keep "Emulated", "Mimicked mockingly".
+- TREKS: remove "Bikes that tend to use Bontrager components" (industry-only brand knowledge).
+- HAGAR: remove "Sammy who's playing a concert in Manchester, UK tonight" (time-bound, local).
+- IDLER: keep "Lazybones"; remove the Fiona Apple album-title clues (deep cut).
+- CHAP: keep "Fella", "What lips may do when it's cold out"; remove "Leeds lad" (UK-regional).
+
+## Formatting in clues
+Markup such as {/Title/} (italics) and {*M*} (emphasis) is formatting, not a reason to remove a clue. Copy kept clues exactly as given, markup included.
+
+## Rules
+- Only delete. Never rewrite, merge, or invent clues or words.
+- Keep the original order of words and of the remaining clues.
+
+## Input
+A JSON object mapping uppercase answers to arrays of clue strings.
+
+## Output
+Return only the pruned JSON object, in the same shape, as valid JSON. No markdown fences, commentary, scores, or explanations.
