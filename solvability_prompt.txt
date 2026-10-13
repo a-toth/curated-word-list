@@ -1,52 +1,55 @@
 Prune crossword clues for a standalone word game (no grid, no crossing letters). Report only what to delete.
 
 ## Goal
-Players see one clue and must find the answer with no other help. Keep a clue only if a typical solver would both:
-1. solve it from the clue alone, and
-2. recognize the answer as a real, familiar word or phrase.
-If either fails, delete the clue.
+Players see one clue and must find the answer with no other help. Most clues are fine. Delete a clue only if it clearly fails: a typical solver could not get the answer from the clue alone, or would not recognize the answer as a familiar word.
+
+Judge the knowledge the clue itself requires, not just whether the answer is familiar. A familiar answer does not save a clue built on specialist trivia, an obscure namesake, or a little-known work. Do not delete a clue for being plain, similar to another clue, or improvable.
+
+Be consistent within a word: if you delete a clue for a niche topic, also delete that word's other clues on the same topic.
+
+A typical word loses 0–3 of its clues. Deleting more than half of a word's clues should be rare.
 
 ## Solver
-A typical American adult who does Monday–Wednesday NYT crosswords. Knows mainstream pop culture, common idioms, everyday objects, and school-level facts. Not a specialist; does not follow niche scenes.
-
-## Keep a clue when it uses
-- common idioms or everyday phrases
-- well-known movies, songs, brands, or mainstream TV
-- widely taught school-level facts
-- a plain synonym or definition of a familiar word
-- light wordplay a Monday solver would get
+A typical American adult who does Monday–Wednesday NYT crosswords. Knows mainstream pop culture, common idioms, everyday objects, and school-level facts. Not a specialist.
 
 ## Delete a clue when it needs
-- niche hobbies, sports stats, or brands known only within one industry
-- regional or local references (UK-only slang, obscure places, one-off venues)
-- professional or academic jargon, or a specialist loanword
-- opera, classical, or specialist arts terms
-- celebrities or brands famous only briefly or in one scene
-- deep cuts: album titles, B-sides, Reddit or Twitter memes, "tonight" or other time-bound events
-- a fill-in-the-blank built on an obscure title or quote
+- niche or specialist knowledge: industry-only brands, jargon, specialist loanwords, sports stats, opera/classical terms
+- regional or local references (UK-only slang, obscure places)
+- deep cuts: album titles, Reddit or Twitter memes, briefly famous people, "tonight" or other time-bound events
 - wordplay that is unfair without crossing letters
-- an abbreviation or foreign word the clue doesn't clearly signal
-- vague definitions that fit many answers equally well
+- or when the clue is empty or is only "--". Inside a clue, "--", "__" and "___" are fill-in blanks, not errors.
 
-When unsure about a clue, delete it.
+When unsure, keep the clue.
 
 ## Drop a whole word when
-- the answer is obscure or crosswordese the solver wouldn't recognize as familiar (e.g. ANI, SAO), or
-- every one of its clues would be deleted.
-When unsure about a word, keep it. Never drop a word just because few clues remain.
+The answer is obscure or crosswordese the solver wouldn't recognize (e.g. ANI, SAO), or every clue would be deleted. When unsure, keep the word.
 
 ## Examples
-- APED: keep "Emulated", "Mimicked mockingly".
-- CHAP: keep "Fella"; delete "Leeds lad" (UK-regional).
-- IDLER: keep "Lazybones"; delete the Fiona Apple album titles (deep cut) and "Flaneur" (specialist loanword).
-- TREKS: delete "Bikes that tend to use Bontrager components" (industry-only brand).
-- HAGAR: delete "Sammy who's playing a concert in Manchester, UK tonight" (time-bound, local).
-- Wordplay: keep "It's spent on Nice things?" (EURO); delete "Helps with a tense situation?" (EDITS) and "Prepares for a hike?" (HUTS).
+Keep (plain, knowable):
+- LOIN: "Tender meat cut"
+- HUTS: "Shacks"
+- OMITS: "Doesn't mention"
+- APED: "Emulated"
+- EURO: "It's spent on Nice things?" (light wordplay a Monday solver gets)
+
+Delete:
+- CHAP: "Leeds lad" (UK-regional)
+- IDLER: Fiona Apple album titles (deep cut), "Flaneur" (specialist loanword)
+- TREKS: "Bikes that tend to use Bontrager components" (industry-only brand)
+- HAGAR: "Sammy who's playing a concert in Manchester, UK tonight" (time-bound)
+- EDITS: "Helps with a tense situation?" (unfair wordplay)
+- HUTS: "Examples of vernacular architecture" (academic jargon, though HUTS is familiar)
+- EURO: "Maltese note" (needs knowing Malta's currency)
 
 Markup such as {/Title/} (italics) is formatting, not a reason to delete.
 
 ## Input
-A JSON object mapping uppercase answers to arrays of clue strings. Clue positions are 0-based: the first clue in each array is 0.
+Each word on its own line, followed by its clues, each prefixed with its number in brackets:
+WORD
+[0] first clue
+[1] second clue
+
+Use exactly those bracketed numbers in your output. Do not count positions yourself.
 
 ## Output
 Plain text, one line per word that needs a change, in input order:

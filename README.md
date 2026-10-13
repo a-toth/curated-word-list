@@ -16,9 +16,11 @@ Every `.json` has a matching `.json.gz` (gzip -9, identical contents).
 
 | File | Size | Notes |
 | --- | --- | --- |
-| `clues_filtered.json` | 3.83 MB | word → array of 15 clue strings |
-| `clues_filtered.json.gz` | 1.55 MB | gzip -9 of the above |
-| `filter_clues.py` | — | the script that builds them from `clues.tsv` |
+| `clues_filtered.json` | 3.33 MB | word → array of 2–15 clue strings |
+| `clues_filtered.json.gz` | 1.33 MB | gzip -9 of the above |
+| `filter_clues.py` | — | builds the unpruned corpus from `clues.tsv` |
+| `prune_clues.py` | — | splits the corpus for model judging and applies the deletions |
+| `solvability_prompt.txt` | — | the judging prompt |
 
 ## Format
 
@@ -42,8 +44,9 @@ Built from 9,981,797 corpus rows; 1,054,602 survived filtering.
   not raw appearances
 - the 15 most recent clues are kept
 
-Result: **9,073 unique words** and 136,095 clues — 1,643 words of length 3,
-3,465 of length 4, 3,965 of length 5. Every word carries a full 15 clues.
+Result before pruning: 9,073 unique words and 136,095 clues — 1,643 words of
+length 3, 3,465 of length 4, 3,965 of length 5. Every word carries a full 15
+clues. See [Solvability pruning](#solvability-pruning) for the shipped corpus.
 
 ### Why 30
 
@@ -86,6 +89,34 @@ five in each line of a sonnet".
 
 Filtering happens per source row, before the per-word cap, so a word that loses
 a clue backfills with its next-best real one.
+
+## Solvability pruning
+
+The clues are meant for a standalone game with no grid and no crossing letters,
+so the filtered corpus was pruned a second time. An LLM (Claude Sonnet, low
+reasoning) judged every clue with `solvability_prompt.txt` against a typical
+Monday–Wednesday NYT solver, deleting clues that need niche or regional
+knowledge, deep pop-culture cuts, time-bound references, or wordplay that is
+unfair without crossings. Whole words were dropped when the answer itself is
+obscure crosswordese or an abbreviation (ANI, SAO, ERTE, ESTD).
+
+Result: **9,023 unique words** and **124,084 clues** — 1,627 words of length 3,
+3,442 of length 4, 3,954 of length 5. 50 words and 12,011 clues (8.8%) were
+removed. Clue counts now vary: 3,726 words keep all 15, and 14 words have 5 or
+fewer.
+
+The model only outputs deletion lists (`WORD 2 7` or `WORD -`); the script
+applies them, so clue text is never rewritten:
+
+```sh
+python3 prune_clues.py split clues_filtered.json work      # 100-word batches
+# judge each work/batches/batch_NNN.txt, save to work/deletions/batch_NNN.txt
+python3 prune_clues.py check work
+python3 prune_clues.py apply work clues_filtered.json
+```
+
+Re-running `filter_clues.py` overwrites `clues_filtered.json` with the unpruned
+corpus.
 
 ## Serving the `.gz`
 
