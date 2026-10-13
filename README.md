@@ -1,14 +1,23 @@
 # curated-word-list
 
-3–5 letter crossword answers with recent clues, filtered from the
-[xd crossword corpus](https://xd.saul.pw/).
+Word and puzzle data for word-game generators.
+
+- **Crossword clues** — 3–5 letter answers with recent clues, filtered from the
+  [xd crossword corpus](https://xd.saul.pw/).
+- **Strands** — 730 daily word-search puzzles and a 59,551-word dictionary.
+
+Every `.json` has a matching `.json.gz` (gzip -9, identical contents).
+
+---
+
+# Crossword clues
 
 ## Files
 
 | File | Size | Notes |
 | --- | --- | --- |
 | `clues_filtered.json` | 3.83 MB | word → array of 15 clue strings |
-| `clues_filtered.json.gz` | 1.55 MB | gzip -9 of the above, identical contents |
+| `clues_filtered.json.gz` | 1.55 MB | gzip -9 of the above |
 | `filter_clues.py` | — | the script that builds them from `clues.tsv` |
 
 ## Format
@@ -90,3 +99,62 @@ fly anyway, so the plain file is often the simpler choice.
 Clue text originates with the individual puzzle publishers and reaches this
 repo via the xd corpus, which carries its own terms. No license file has been
 chosen for this repository yet — review the upstream terms before reuse.
+
+---
+
+# Strands
+
+| File | Size | gzipped |
+| --- | --- | --- |
+| `strands-puzzles.json` | 441 KB | 100 KB |
+| `strands-words.json` | 627 KB | 163 KB |
+
+## `strands-puzzles.json`
+
+730 daily puzzles, one per day from **2026-10-12 to 2028-10-10**, drawn from 337
+distinct themes. Grids are 8 rows × 6 columns.
+
+```json
+{
+  "game": "Strands", "start": "2026-10-12", "end": "2028-10-10",
+  "rows": 8, "cols": 6, "themes": 338, "days": 730,
+  "puzzles": [
+    {
+      "date": "2026-10-12",
+      "clue": "Stormy weather",
+      "spangram": "STORMFRONT",
+      "grid": "SEAGELTOLGUETRFONDYPMRTTTHPMETNOOESEARNOCNDOCYLO",
+      "words": [{"word": "STORMFRONT", "cells": [0, 6, 7, 13, 20, ...], "spangram": true}]
+    }
+  ]
+}
+```
+
+`grid` is 48 characters in row-major order, so cell `n` sits at row `n / 6`,
+column `n % 6`. Each `cells` array lists the path spelling that word. Puzzles
+carry 6 to 9 words each.
+
+### Validation
+
+All 730 puzzles were checked and pass:
+
+- every `cells` path spells its `word` against the grid — 0 mismatches
+- every step in a path is adjacent, diagonals included — 0 breaks
+- each puzzle's words cover all 48 cells exactly once — 0 gaps, 0 overlaps
+
+## `strands-words.json`
+
+A flat sorted array of 59,551 unique uppercase words, 4 to 12 letters, for
+validating player guesses.
+
+```json
+["AARDVARK", "AARDVARKS", "AARGH"]
+```
+
+### Note on theme words
+
+332 theme answers used by the puzzles are **not** in this dictionary, because
+they are proper nouns — ACADIA, AKRON, ALGERIA, AMUNDSEN, ATHENS, BALI,
+BELFAST. The dictionary holds common nouns only. If a game validates guesses
+against this file alone, those theme words will be rejected; validate theme
+words against the puzzle's own `words` array first.
