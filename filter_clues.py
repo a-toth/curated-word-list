@@ -19,8 +19,23 @@ Rules:
   * output = the 5 most-used staple clues, then up to 8 recent
     distinct clues (13 per word at most)
 
-Usage: python3 filter_clues_v9.py <input.tsv> <output.json> [min_appearances]
+A shorter --years window is the dial for clue freshness: a 10-year window
+drags in dated and abstract clues, and narrowing it to 4 costs almost no words
+provided --min-appearances drops to match (a 4-year window simply holds fewer
+appearances per word).
+
+The staple rule is a SECOND popularity filter on top of MIN_APPEARANCES: it
+asks that a word own a settled, often-repeated clue. That measures how
+established a word is in crossword grids, not whether a solver knows it, and
+it costs 12,363 qualifying words down to 8,423. When the downstream gate is
+general English frequency (see curate.py), set --min-staple-uses 1 to switch
+it off and let frequency do the judging instead.
+
+Usage: python3 filter_clues.py <input.tsv> <output.json> [min_appearances]
+       python3 filter_clues.py clues.tsv clues_wide.json --min-appearances 10 \
+                               --min-staple-uses 1 --max-staples 20
 """
+import argparse
 import sys
 import json
 import re
@@ -95,9 +110,11 @@ def current_year():
     return datetime.datetime.now().year
 
 
-def process(input_path, output_path, min_appearances=MIN_APPEARANCES):
+def process(input_path, output_path, min_appearances=MIN_APPEARANCES,
+            min_staple_uses=MIN_STAPLE_USES, max_staples=MAX_STAPLES,
+            max_fresh=MAX_FRESH_CLUES, eligibility_years=ELIGIBILITY_YEARS):
     year_now = current_year()
-    eligibility_from = year_now - ELIGIBILITY_YEARS
+    eligibility_from = year_now - eligibility_years
     content_from = year_now - CONTENT_YEARS
 
     counts = defaultdict(Counter)   # word -> clue -> appearances in window
@@ -165,7 +182,7 @@ def process(input_path, output_path, min_appearances=MIN_APPEARANCES):
         # first; clue text breaks ties so the output is deterministic.
         staples = [c for c, n in sorted(
             clue_counts.items(), key=lambda cn: (-cn[1], cn[0]),
-        ) if n >= MIN_STAPLE_USES][:MAX_STAPLES]
+        ) if n >= min_staple_uses][:max_staples]
 
         if not staples:
             dropped_flat += 1
@@ -176,7 +193,7 @@ def process(input_path, output_path, min_appearances=MIN_APPEARANCES):
         fresh = [c for c, _y in sorted(
             ((c, y) for c, y in recent[word].items() if c not in seen),
             key=lambda cy: (-cy[1], cy[0]),
-        )][:MAX_FRESH_CLUES]
+        )][:max_fresh]
 
         staple_total += len(staples)
         fresh_total += len(fresh)
@@ -193,7 +210,7 @@ def process(input_path, output_path, min_appearances=MIN_APPEARANCES):
 
     print(f"Total data rows scanned:      {total_rows:,}")
     print(f"Dropped, puzzle-internal:     {dropped_puzzle_ref:,}")
-    print(f"Rows inside {ELIGIBILITY_YEARS}-year window:  {in_window:,}")
+    print(f"Rows inside {eligibility_years}-year window:  {in_window:,}")
     print(f"Words seen:                   {len(counts):,}")
     print(f"Dropped (<{min_appearances} appearances):   {dropped_thin:,}")
     print(f"Dropped (no staple clue):     {dropped_flat:,}")
@@ -201,16 +218,31 @@ def process(input_path, output_path, min_appearances=MIN_APPEARANCES):
     for L in sorted(by_len):
         print(f"  length {L}: {by_len[L]:,} words")
     print(f"Clues in output:              {staple_total + fresh_total:,}")
-    print(f"  staples (>= {MIN_STAPLE_USES} uses):           {staple_total:,}")
-    print(f"  fresh (last {CONTENT_YEARS} yr, max {MAX_FRESH_CLUES}):  {fresh_total:,}")
+    print(f"  staples (>= {min_staple_uses} uses):           {staple_total:,}")
+    print(f"  fresh (last {CONTENT_YEARS} yr, max {max_fresh}):  {fresh_total:,}")
     print(f"Words with no fresh clue:     {no_fresh:,}")
     print(f"Eligibility window: >= {eligibility_from}   Content window: >= {content_from}")
     print(f"Output written to: {output_path}")
 
 
 if __name__ == '__main__':
-    if len(sys.argv) not in (3, 4):
-        print("Usage: python3 filter_clues_v9.py <input.tsv> <output.json> [min_appearances]")
-        sys.exit(1)
-    process(sys.argv[1], sys.argv[2],
-            int(sys.argv[3]) if len(sys.argv) == 4 else MIN_APPEARANCES)
+    p = argparse.ArgumentParser(description=__doc__.split('\n')[0])
+    p.add_argument('input', help='the xd clues.tsv corpus')
+    p.add_argument('output', help='word -> clues JSON to write')
+    p.add_argument('min_appearances_pos', nargs='?', type=int,
+                   help=argparse.SUPPRESS)   # backwards-compatible 3rd argument
+    p.add_argument('--min-appearances', type=int, default=MIN_APPEARANCES)
+    p.add_argument('--min-staple-uses', type=int, default=MIN_STAPLE_USES,
+                   help='uses before a clue counts as settled; 1 switches the '
+                        f'staple rule off (default: {MIN_STAPLE_USES})')
+    p.add_argument('--max-staples', type=int, default=MAX_STAPLES)
+    p.add_argument('--max-fresh', type=int, default=MAX_FRESH_CLUES)
+    p.add_argument('--years', type=int, default=ELIGIBILITY_YEARS,
+                   help='clue window in years; clues older than this are not '
+                        'collected at all, and a word with nothing inside it '
+                        f'drops out (default: {ELIGIBILITY_YEARS})')
+    a = p.parse_args()
+    process(a.input, a.output,
+            a.min_appearances_pos if a.min_appearances_pos is not None
+            else a.min_appearances,
+            a.min_staple_uses, a.max_staples, a.max_fresh, a.years)

@@ -23,22 +23,24 @@ curated Mini pool, byte-identical to `clues_clean_v1.json`.
 | --- | --- | --- |
 | `clues_filtered.json` | 204 KB | **what the game serves** — a copy of the current `clues_clean_vN.json` |
 | `clues_filtered.json.gz` | 84 KB | gzip -9 of the above, identical contents |
-| `clues_clean_v1.json` | 204 KB | the curated Mini pool, frozen: easy words only, 3 clues each |
-| `clues_clean_v1.json.gz` | 84 KB | gzip -9 of the above, identical contents |
-| `scores_v1.json` | 42 KB | word -> Zipf frequency, for weighting the fill |
-| `curate.py` | — | the script that builds `clues_clean_vN.json` from `clues_full.json` |
-| `clues_full.json` | 2.08 MB | the full pool before the familiarity cut — `curate.py`'s input |
-| `clues_full.json.gz` | 839 KB | gzip -9 of the full pool |
-| `filter_clues.py` | — | the script that builds `clues_full.json` from `clues.tsv` |
+| `clues_clean_v2.json` | 0.96 MB | **current version** — 5,595 words, ~9 clues each |
+| `clues_clean_v2.json.gz` | 385 KB | gzip -9 of the above, identical contents |
+| `scores_v2.json` | — | word -> Zipf frequency, for weighting the fill |
+| `clues_clean_v1.json` | 204 KB | frozen: 3,578 words, 3 clues each |
+| `curate.py` | — | the script that builds `clues_clean_vN.json` |
+| `clues_recent.json` | 3.6 MB | the two-bucket pool — `curate.py`'s input since v2 |
+| `clues_recent.json.gz` | 1.4 MB | gzip -9 of that pool |
+| `clues_full.json` | 2.08 MB | the pool `curate.py` used for v1 |
+| `filter_clues.py` | — | the script that builds both pools from `clues.tsv` |
 | `clues_legacy.json` | 3.33 MB | an older generation, kept to fall back to |
 | `clues_legacy.json.gz` | 1.33 MB | gzip -9 of the legacy list |
 | `filter_clues_legacy.py` | — | the script that built the legacy list |
 
-### The three generations
+### The generations
 
-`clues_legacy.json` -> `clues_full.json` -> `clues_clean_vN.json`. Each is kept
-rather than replaced, because the Mini is a pure function of (day, word pool)
-and going back to an earlier pool has to stay possible.
+`clues_legacy.json` -> `clues_full.json` -> `clues_recent.json` ->
+`clues_clean_vN.json`. Each is kept rather than replaced, because the Mini is a
+pure function of (day, word pool) and going back has to stay possible.
 
 ### Switching what is served
 
@@ -47,8 +49,8 @@ The game needs no edit — its `WORD_DATA_URL` points at that filename. To go
 back to the full pool:
 
 ```sh
-cp clues_full.json clues_filtered.json
-cp clues_full.json.gz clues_filtered.json.gz
+cp clues_clean_v1.json clues_filtered.json
+cp clues_clean_v1.json.gz clues_filtered.json.gz
 ```
 
 Swapping the served file changes the puzzle for every day, including days
@@ -103,26 +105,65 @@ a familiar one. ESSEN, GENOA and PADUA all score 50, so this gate is necessary
 and nowhere near sufficient.
 
 **Familiarity** — general English frequency, via `wordfreq`'s Zipf scale. This
-is the gate that does the work, and `--zipf` is the main dial:
+is the gate that does the work, and `--zipf` is the main dial.
 
-| Zipf | words | len 3 | len 4 | len 5 |
-| ---: | ---: | ---: | ---: | ---: |
-| 2.5 | 4,559 | 744 | 1,873 | 1,942 |
-| 2.8 | 4,036 | 693 | 1,671 | 1,672 |
-| **3.0** | **3,578** | **616** | **1,493** | **1,469** |
-| 3.2 | 3,136 | 550 | 1,331 | 1,255 |
-| 3.5 | 2,497 | 445 | 1,084 | 968 |
+### Two upstream constraints, and what they cost
 
-v1 ships at 3.0. Quality holds down to about 3.0 — lowering 3.5 to 3.0 buys
-back ZEBRA, HINGE, SUEDE, TOXIN, SHAWL, SMIRK and CHORE — and starts to drift
-below 2.8, where CILIA, TETRA, ADDER, LIKEN and WAHOO come back. At 3.5 the
-five-letter pool falls under a thousand, which is thin for a fully-checked 5x5.
+v1 curated `clues_full.json`, which caps out at 8,423 words. Lowering `--zipf`
+to widen the pool trades quality for size and runs out of road around 4,600.
+Both real constraints were upstream, in `filter_clues.py`.
+
+**The staple rule.** A word had to own one clue used 10 or more times. That is
+a second popularity filter on top of the appearance threshold, and it measures
+how established a word is in crossword grids, not whether a solver knows it.
+It cost 12,363 qualifying words down to 8,423, cutting ordinary words that
+simply never settled on a stock clue. `--min-staple-uses 1` switches it off and
+lets frequency judge instead, which gives more words at a **higher** quality
+bar:
+
+| Zipf | staple rule on | staple rule off |
+| ---: | ---: | ---: |
+| 3.0 | 3,710 | 5,138 |
+| **2.8** | 4,140 | **5,766** |
+| 2.5 | 4,663 | 6,637 |
+
+**Which clues each word keeps.** The pool is built from two buckets: the **5
+most-used clues over 10 years**, then the **5 most recent from the past year**,
+so every word carries its heavy hitters plus what is current. Earlier builds
+took 20 of each, which dragged in clues used only once — 31% of the total, and
+the source of every rambling 160-character clue. Capping each bucket at 5 is
+what keeps the clue list from outweighing the words.
+
+### Clue count and staleness
+
+The page picks a clue at random, so the number a word keeps controls how often
+a repeated word repeats its clue. v1 kept 3 and showed the same clue on
+**33.5%** of repeat pairs. v2 keeps up to 10, and that falls to **12.4%**
+— REST appears 39 times over two years with 10 different clues.
+
+This is also why the page should keep choosing at random rather than switching
+to `clues[0]`: every clue has passed the quality gate, so a random pick is safe
+and the variety is free.
+
+Two clue rules guard against ageing. **Time-bound** clues go ("Bob who will
+turn 85 in May", "this season", "as of 2024") because puzzles are generated
+years before they are played — that rule alone removed DYLAN, whose every clue
+was pegged to something. **Censored or placeholder** text from the source
+corpus goes too; BUTCH arrived with `****` as its most-used clue.
 
 ### Building a version
 
 ```sh
-python3 curate.py --source clues_full.json --zipf 3.0 --clues 3 \
-                  --out clues_clean_v1.json --scores-out scores_v1.json
+# the pool: 5 most-used clues over 10 years, plus 5 most recent from the
+# last year, for every word appearing at least 10 times
+python3 filter_clues.py clues.tsv clues_recent.json \
+        --years 10 --min-appearances 10 --min-staple-uses 1 \
+        --max-staples 5 --max-fresh 5
+
+# then curate it
+python3 curate.py --source clues_recent.json --zipf 2.8 --clues 0 \
+                  --proper-zipf 4.0 --out clues_clean_v2.json \
+                  --scores-out scores_v2.json
 ```
 
 Needs `wordfreq` (`pip install wordfreq`) and both Spread the Wordlist
@@ -167,27 +208,35 @@ already played. Build `clues_clean_v2.json` instead and repoint the page.
 
 ### Results
 
-**3,578 words, 10,726 clues** — 616 of length 3, 1,493 of length 4, 1,469 of
-length 5, three clues each. 42% of the source survives.
+**5,595 words, 48,125 clues** — 715 of length 3, 1,940 of length 4, 2,940 of
+length 5, 8.6 clues per word.
 
 Checked against the game's own generator, lifted out of the page and run
-headless: **730 of 730 days fill**, at 5.1 ms per puzzle, using 1,843 distinct
-words. The most repeated entries become REST, TSAR, ARISE, NEST and ELSE
-instead of ESSE, SSNS and EENIE. Repetition is higher than with the full pool
-(62 appearances over two years, against 12) — the cost of a pool a quarter the
-size, and the reason not to push `--zipf` much above 3.0.
+headless over two years of puzzles:
 
-At 204 KB the file is a tenth of `clues_filtered.json`, which also buys margin
-against the page's 4-second fetch timeout.
+| | v1 | v2 |
+| --- | ---: | ---: |
+| words | 3,578 | **5,595** |
+| clues | 10,726 | **48,125** |
+| clues per word | 3 | **8.6** |
+| 5-letter words | 1,469 | **2,940** |
+| Zipf floor | 3.0 | **2.8** |
+| days filled, of 730 | 730 | **730** |
+| distinct words used | 1,843 | **2,593** |
+| repeats with the same clue | 33.5% | **12.4%** |
+
+The most repeated entries are REST, TEST, NEST and ARENA, against ESSE, SSNS
+and EENIE for the uncurated list.
 
 ### Using it in the game
 
-Already live: `clues_filtered.json` is a copy of `clues_clean_v1.json`, and the
+`clues_filtered.json` is a copy of the current `clues_clean_vN.json`, and the
 schema is unchanged, so the page needed no edit at all. Two optional follow-ups
 in the page:
 
-- Use `clues[0]` rather than a random clue. The script orders clues for this.
-  (`clues_filtered.json` is already ordered this way, so this works today.)
+- Leave clue choice random. Clues are ordered plainest-first, so `clues[0]` is
+  available, but every clue has passed the quality gate and random choice is
+  what keeps a repeated word from repeating its clue.
 - Weight the candidate pool by `scores_v1.json` instead of shuffling
   uniformly, with seeded randomness inside a tier. Determinism survives
   because the ordering is fixed by the file.

@@ -1,0 +1,114 @@
+========================================================================
+Mini word-list curation
+========================================================================
+Source:          clues_recent.json  (16,511 words)
+Zipf floor:      2.8
+Score floor:     50
+Clues per word:  0
+
+1. Normalize (A-Z, 3-5 letters, >=1 clue)
+   kept 16,511   cut 0
+   len 3: 2,368  len 4: 5,461  len 5: 8,682
+
+2. Legitimacy gate (Spread the Wordlist score >= 50)
+   wordlist entries: 304,410  ->  304,410 A-Z keys
+   kept 12,314   cut 4,197 (4,196 scored low, 1 not listed)
+   len 3: 1,596  len 4: 3,650  len 5: 7,068
+   cut, low score: APERY, BEFOG, CARY, CERO, CHITA, DUAD, DUEIN, EDDA, HRE, JAMA, KENTE, LOGIA, MMI, MUON, NPH, OOZY, ORT, QUIRE, ROONE, SERIO, TYR, UNGER, VERN, YAXIS, ZOEY, ... (+4,171 more)
+   cut, not listed: CTE
+
+3. Familiarity gate (Zipf >= 2.8)
+   kept 7,582   cut 4,732
+   len 3: 1,308  len 4: 2,500  len 5: 3,774
+   cut: ATEIN, BRAYS, CLOPS, CONKS, EDY, EENSY, ELWES, HOWRU, IWISH, KASHA, LIESL, MBAS, MILLI, NFT, ONEPM, PERMS, PYRES, REUPS, SOOEY, SPLAT, SULKS, TIBBS, TOGA, UMPS, WONK, ... (+4,707 more)
+
+4. Drop non-words (proper nouns, abbreviations, multi-word partials)
+   kept 5,754   cut 1,828
+   len 3: 756  len 4: 2,005  len 5: 2,993
+   cut, abbreviation (450): ANS, BCE, CCTV, DNA, ENT, ESP, FCC, FTW, IBM, INT, ISS, KOS, MMA, MPEG, MTG, MTV, NEA, OPEC, PLO, SXSW, TBH, TUE, UGG, USS, VII, ... (+425 more)
+   cut, multiword (70): AMI, ASA, ASIF, CIS, DND, DOIN, EBOOK, ESE, IMA, INFRA, ING, INTRA, ISO, ITA, MIS, NEURO, NON, NOONE, OFA, PARA, SCIFI, TATA, TOGO, TRON, XIN, ... (+45 more)
+   cut, proper noun (1,308): ARIEL, BONO, CAPRI, CASEY, DARTH, DARYL, DEPP, GAYE, HERR, HULU, JENNA, KAY, KIRBY, LUIS, MEG, MORAN, NELLY, POOH, RAFA, RIC, ROCCO, SAO, TIBET, UNO, WEISS, ... (+1,283 more)
+   kept, proper noun above Zipf 4.0 (210): ANDY, BOBBY, COLE, COSTA, DYLAN, FORD, GARY, HINDU, INTEL, JASON, JOAN, JUAN, JUNE, KYLE, LATIN, LEWIS, LINDA, LUCY, MILAN, OHIO, PAUL, SEAN, THAI, TONY, XBOX, ... (+185 more)
+
+5. Manual lists
+   allowlist 0   blocklist 132
+   forced in 0: -
+   forced out 114: ALICE, ANN, BLEU, DER, DIEGO, DIEM, EINE, ENTRE, FRAU, INTEL, ISLA, JOJO, LUKE, MADRE, MAGNA, MANO, MES, NITE, OLE, ORO, ROI, SHUI, STAN, TRES, UNE, ... (+89 more)
+   kept 5,640
+
+6. Clue cleanup (no cap plainest per word)
+   kept 5,595 words, 48,125 clues   cut 45 words with no clue left
+   clues dropped, trivia (proper names): 4,099
+   clues dropped, wordplay (?): 1,254
+   clues dropped, trivia (name needed): 1,194
+   clues dropped, time-bound: 37
+   clues dropped, censored or placeholder: 31
+   clues dropped, gives away the answer: 3
+   of those, proper nouns with no name-free clue (41): ALEX, AMY, ANNA, BRIAN, DANNY, DICK, JAMIE, JANE, JESSE, JESUS, KENNY, KEVIN, KYLE, LAURA, LINDA, MARC, MOORE, OWEN, PAUL, PERRY, RYAN, SARAH, SHAW, TED, TOMMY, ... (+16 more)
+   cut, no usable clue: ALEX, AMY, ANNA, DANNY, DICK, GREG, JAMIE, JANE, JESSE, JESUS, KENNY, KYLE, LAURA, LINDA, LLOYD, MATT, MCKAY, MOORE, OWEN, PERRY, RYAN, SARAH, SEAN, SIMON, WHATS, ... (+20 more)
+
+========================================================================
+Result
+========================================================================
+   16,511 words in  ->  5,595 words out (34%)
+   len 3: 715  len 4: 1,940  len 5: 2,940
+   48,125 clues, 8.6 per word
+
+
+Survivors, random sample of 3-letter words
+   APS  3.12  Courses for coll. credit
+   BIB  2.97  Clothing protector
+   CAD  3.41  Scoundrel
+   CRY  4.59  Weep
+   DEF  3.91  Dict. info
+   FOB  3.10  Watch chain
+   HAY  3.91  Cow chow
+   MIL  3.74  Wire measure
+   MPH  4.03  Speedometer stat
+   PAD  4.01  Cushion
+   PHI  3.55  Letter after upsilon
+   POX  3.01  Curse
+   PUT  5.66  Place
+   SOB  3.27  Cry loudly
+   WAG  3.03  Witty one
+
+Survivors, random sample of 4-letter words
+   ACID  4.45  Battery fluid
+   BUGS  4.04  Pesters
+   DUMP  4.08  Break up with
+   FEND  3.21  Ward (off)
+   KICK  4.72  Boot
+   LADS  3.86  Young fellows
+   OUCH  3.56  Cry of pain
+   PASO  3.47  El ___, Texas
+   ROCK  5.03  Boulder
+   SASS  2.98  Back talk
+   SLOW  4.85  Leisurely
+   SNOT  2.91  Little brat
+   SWAG  3.19  Booty
+   WEAK  4.66  Feeble
+   ZINC  3.65  Galvanizing matter
+
+Survivors, random sample of 5-letter words
+   AGONY  3.60  Extreme pain
+   ANVIL  3.04  Blacksmith's block
+   ARGON  2.86  Inert gas
+   ASIAN  4.69  Like most of the world's people
+   ATLAS  3.80  Book of maps
+   FILTH  3.41  Grime
+   FLAKY  2.87  Completely unreliable
+   JAMES  5.11  "I can make a lord, but only God can make a gentleman" king
+   MELON  3.32  Honeydew, e.g.
+   OLLIE  3.30  Skateboarding jump
+   PAWNS  2.99  Lowly chess pieces
+   SCRUM  3.25  Rugby formation
+   SHIPS  4.55  Cruise vessels
+   TRADE  5.12  Swap
+   WAFER  3.13  Thin cookie
+
+At the threshold (Zipf 2.55-3.05) - review these to tune --zipf
+   kept:    ZIG, WHEY, TRAMS, TEENY, SUES, STABS, SMOG, SLUGS, SKA, RUMP, RARER, QUARK, PICO, MEA, MAGS, LEAPT, JAG, HISS, HASNT, FLAX, EMU, EMIR, DIVAS, CUSP, CRUX, COOLS, BOSOM, BOD, BEET, ASP, YOLK, YAM, WINCH, TROVE, SWAMI, SUS, STAVE, SNIPE, SMIRK, RUPEE, POISE, PETAL, MUSES, MOCKS, KOALA, KHAKI, JETTY, HUTCH, HONED, HOLED, GOODY, GNU, FUSSY, FRIAR, FORAY, EBB, DROOL, DICED, DECOY, CRAMP, COB, CMON, CADRE, CABAL, ANVIL, YEW, YANKS, WAG, VIGOR, VEE, ULCER, TWIG, TOOT, TOON, TOIL, TIFF, TAS, SUVS, SUI, SORES, SCION, RONDO, RIA, PUSS, MIO, KEBAB, ERODE, CROCK, CEDED, BOOS, BODE, BLOT, AMOUR, ZED, VEER, TUTU, SPECK, SOOT, SILO, SIFT, SHAG, REEDS, PIED, NACHO, MUS, MORAY, MINTS, MINCE, LONGS, KNOBS, KETO, JOLT, GRAZE, GAH, FAWN, FANGS, EMITS, CHINO, CHIA, BUFFS, AXIOM, YETI, WARTS, VICES, UMP, TYPOS, TSK, TAMED, SWIMS, SNORT, SKEW, SHH, SEER, SAHIB, RUNE, RUDDY, ROUX, QUART, POX, ORC, OHM, OARS, MOM
+   dropped: TBS, SWEDE, PRIUS, MAUDE, LUCIE, LILA, LEIA, GALLO, CST, CITI, ATF, ARGUS, SOCHI, RAOUL, RAMBO, PTA, PMS, PAPI, MTG, MONDE, MERLE, MACS, LOREN, LEXI, LEES, KOS, JPEG, FISK, FEMA, DRACO, DIEM, ATA, ASU, ASTRA, ADV, ACCRA, WNBA, WACO, UTE, TRU, SYN, NATS, MILA, MERCK, MAYS, MARGO, LOEB, HVAC, DUNNE, COHN, BENIN, BANTU, AVEC, ASSN, AMER, USAF, SSE, SABRE, RSVP, PIUS, PDT, KATO, JANUS, IRMA, GUMP, ELMO, CREE, ANYA, AISHA, AGAR, XEROX, TWAS, TEMPE, SHUI, RHEA, PARR, PARMA, OOP, OATES, NEILL, LOHAN, KPOP, INCA, EXO, EEG, CLEO, CDR, CABOT, ATS, ANIL, WSJ, UPI, TUNIS, TOGO, TANIA, SXSW, PEI, NOLA, NITE, NDA, MOTT, MES, JETER, EWAN, EROS, EPSOM, DMC, CSU, CBT, BRB, ASL, ARR, AOC, UTICA, TERI, OLA, OAHU, MOBIL, LOTTE, JONI, GRECO, GED, DARA, CAJUN, BADER, ARGO, AIMEE, VOLTA, VINNY, VIMEO, TUPAC, THEA, SRS, SAGAN, RIGA, RHETT, PUGET, PHNOM, PETRI, OSS, ORI, NOOR, NEA, MENA, MCU, MAIA, LILLE, LALA, 
+
+Wrote clues_clean_v2.json
+Wrote scores_v2.json

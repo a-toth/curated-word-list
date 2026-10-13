@@ -135,6 +135,28 @@ def frequency_lookup(freq_file):
 # Step 4: what the surface forms and clue text say about a word
 # ---------------------------------------------------------------------------
 
+# Clues that will not age well, or that arrived broken.
+#
+# A narrow --years window keeps clue text current, but "current" is exactly
+# what goes stale: a clue pegged to someone's age, to "this year", or to a
+# running season is wrong by the next one. The puzzle is generated years
+# ahead of the day it is played, so these have to go.
+TIME_BOUND = re.compile(
+    r'''
+      \b(?:will\s+(?:turn|be)|turns|turned)\s+\d+
+    | \b(?:this|last|next)\s+(?:year|season|month|week|summer|winter)\b
+    | \b(?:currently|recently|nowadays|these\s+days|to\s+date|so\s+far)\b
+    | \b(?:current|latest|newest|upcoming|recent)\s+
+        (?:season|series|film|movie|album|book|show|host|champion|winner)\b
+    | \bas\s+of\s+(?:20\d\d|today)\b
+    | \bsince\s+20[12]\d\b
+    ''',
+    re.I | re.X,
+)
+
+# "****" and friends: censored or placeholder text from the source corpus.
+CENSORED = re.compile(r'^[\W_]+$')
+
 ABBR_IN_CLUE = re.compile(
     r'\b(?:abbr|abbrev|acronym|initialism|init)\b\.?|'
     r'\bfor\s+short\b|\bin\s+brief\b|\bbriefly\b|\bon\s+a\s+(?:form|label)\b',
@@ -245,20 +267,32 @@ def proper_names(clue):
     return names
 
 
-def clue_verdict(word, clue):
+def clue_verdict(word, clue, strict=False):
     """(drop_reason, penalty) for one clue.
+
+    `strict` raises the bar to "no proper names at all". It is used for words
+    re-admitted by --proper-zipf, which earn their place only on a clue that
+    stands without a second name to recognise: EARTH on "Our planet", IOWA on
+    "Corn Belt state", PETER on "Fizzle (out)". RYAN and TIM have no such
+    clue and drop out entirely, which is the right answer for both.
 
     drop_reason is None when the clue survives. penalty orders survivors:
     0 is a plain definition, 1 carries a name the solver has to know. It
     keeps trivia out of clues[0] without discarding a word that has nothing
     plainer available.
     """
+    if CENSORED.match(clue):
+        return 'censored or placeholder', 0
+    if TIME_BOUND.search(clue):
+        return 'time-bound', 0
     if contains_answer(word, clue):
         return 'gives away the answer', 0
     if '?' in clue:
         # Wordplay. Unfair in a mini with few crossings.
         return 'wordplay (?)', 0
     names = proper_names(clue)
+    if names and strict:
+        return 'trivia (name needed)', 0
     if len(names) >= 2:
         # "Stay" singer Lisa. Two names is a trivia question, not a definition.
         return 'trivia (proper names)', 0
@@ -269,7 +303,7 @@ def clue_verdict(word, clue):
     return None, (1 if names else 0)
 
 
-def clean_clues(word, clues, keep):
+def clean_clues(word, clues, keep, strict=False):
     """Surviving clues, plainest first, capped at `keep`.
 
     Ordering is (penalty, original index, length). The original index is
@@ -279,13 +313,13 @@ def clean_clues(word, clues, keep):
     """
     kept, dropped = [], []
     for index, clue in enumerate(clues):
-        reason, penalty = clue_verdict(word, clue)
+        reason, penalty = clue_verdict(word, clue, strict)
         if reason:
             dropped.append((clue, reason))
         else:
             kept.append((penalty, index, len(clue), clue))
     kept.sort()
-    return [k[3] for k in kept[:keep]], dropped
+    return [k[3] for k in (kept if keep <= 0 else kept[:keep])], dropped
 
 
 # ---------------------------------------------------------------------------
@@ -406,12 +440,19 @@ def curate(args):
                 surfaces[key].append(entry)
 
     cuts_by_reason = defaultdict(list)
+    kept_proper = []
     after_shape = {}
     for word, clues in after_freq.items():
         if word in allow:
             after_shape[word] = clues
             continue
         reason = classify(word, surfaces.get(word, []))
+        if reason == 'proper noun' and freqs[word] >= args.proper_zipf:
+            # EARTH, APRIL, INDIA, PARIS, OHIO. A proper noun this common in
+            # ordinary English is easier than most of the word list; dropping
+            # it on grammar alone costs real words for nothing.
+            kept_proper.append(word)
+            reason = None
         if reason is None and looks_abbreviated(word, clues):
             reason = 'abbreviation'
         if reason:
@@ -427,6 +468,9 @@ def curate(args):
     for reason in sorted(cuts_by_reason):
         words = cuts_by_reason[reason]
         say(f"   cut, {reason} ({len(words):,}): {sample(words)}")
+    if kept_proper:
+        say(f"   kept, proper noun above Zipf {args.proper_zipf} "
+            f"({len(kept_proper):,}): {sample(kept_proper)}")
     say()
 
     # --- 5. Manual lists ----------------------------------------------------
@@ -451,8 +495,10 @@ def curate(args):
     cut_no_clue = []
     clue_cuts = defaultdict(int)
     kept_clues = 0
+    strict_words = set(kept_proper)
     for word, clues in after_shape.items():
-        keep, dropped = clean_clues(word, clues, args.clues_per_word)
+        keep, dropped = clean_clues(word, clues, args.clues_per_word,
+                                    strict=word in strict_words)
         for _text, reason in dropped:
             clue_cuts[reason] += 1
         if not keep:
@@ -460,11 +506,16 @@ def curate(args):
             continue
         final[word] = keep
         kept_clues += len(keep)
-    say(f"6. Clue cleanup (keep {args.clues_per_word} plainest per word)")
+    cap = 'no cap' if args.clues_per_word <= 0 else f"keep {args.clues_per_word}"
+    say(f"6. Clue cleanup ({cap} plainest per word)")
     say(f"   kept {len(final):,} words, {kept_clues:,} clues   "
         f"cut {len(cut_no_clue):,} words with no clue left")
     for reason in sorted(clue_cuts, key=lambda r: -clue_cuts[r]):
         say(f"   clues dropped, {reason}: {clue_cuts[reason]:,}")
+    dropped_proper = sorted(w for w in cut_no_clue if w in strict_words)
+    if dropped_proper:
+        say(f"   of those, proper nouns with no name-free clue "
+            f"({len(dropped_proper):,}): {sample(dropped_proper)}")
     if cut_no_clue:
         say(f"   cut, no usable clue: {sample(cut_no_clue)}")
     say()
@@ -543,8 +594,13 @@ def main():
                    help='Zipf frequency floor (default: 3.5)')
     p.add_argument('--min-score', type=int, default=50,
                    help='Spread the Wordlist score floor (default: 50)')
-    p.add_argument('--clues', dest='clues_per_word', type=int, default=3,
-                   help='clues kept per word (default: 3)')
+    p.add_argument('--clues', dest='clues_per_word', type=int, default=12,
+                   help='clues kept per word, 0 for no cap (default: 12). '
+                        'Clues are ordered plainest-first either way, so a '
+                        'generator can take clues[0] or pick at random.')
+    p.add_argument('--proper-zipf', type=float, default=99.0,
+                   help='keep proper nouns at or above this Zipf, instead of '
+                        'dropping them all (default: 99, i.e. drop them all)')
     p.add_argument('--allowlist', default='allowlist.txt')
     p.add_argument('--blocklist', default='blocklist.txt')
     p.add_argument('--freq-file',
