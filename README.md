@@ -16,11 +16,52 @@ Every `.json` has a matching `.json.gz` (gzip -9, identical contents).
 
 | File | Size | Notes |
 | --- | --- | --- |
-| `clues_filtered.json` | 3.33 MB | word → array of 2–15 clue strings |
-| `clues_filtered.json.gz` | 1.33 MB | gzip -9 of the above |
-| `filter_clues.py` | — | builds the unpruned corpus from `clues.tsv` |
-| `prune_clues.py` | — | splits the corpus for model judging and applies the deletions |
-| `solvability_prompt.txt` | — | the judging prompt |
+| `clues_filtered.json` | 2.08 MB | the current list: word -> array of clue strings |
+| `clues_filtered.json.gz` | 839 KB | gzip -9 of the above, identical contents |
+| `filter_clues.py` | — | the script that builds them from `clues.tsv` |
+| `clues_legacy.json` | 3.33 MB | the previous list, kept to fall back to |
+| `clues_legacy.json.gz` | 1.33 MB | gzip -9 of the legacy list |
+| `filter_clues_legacy.py` | — | the script that built the legacy list |
+
+## Current list: easy words with familiar clues
+
+Built to favour entries a solver will recognise, on the theory that a word
+is easy when its clue is one they have met many times before.
+
+- 10-year eligibility window (>= 2016)
+- answer is `A-Z` only, length 3-5
+- word must appear at least 30 times in the window
+- every clue used at least 10 times in the window is a "staple"; a word
+  needs at least one, and the 5 most-used are kept
+- up to 8 more distinct clues from the last year (>= 2025)
+- puzzle-internal clues are discarded throughout (see below)
+
+**8,423 words, 86,883 clues** — 1,567 of length 3, 3,336 of length 4,
+3,520 of length 5. Staples come first and are ordered most-used first, so
+`clues[0]` is the single most familiar clue for that word; everything
+after the staples is recent flavour.
+
+```
+ERA  ->  Historical period (185x) | Historic period | Historic time |
+         Notable time | Pitching stat | "I'm in my villain ___!" | ...
+```
+
+### Why absolute use count, not a percentage
+
+An earlier cut required one clue to hold some percentage of a word's
+appearances. That selects against easy words: ERA is clued 4,528 times, so
+"Historical period" is only 4.1% of them despite 185 uses, while an
+obscure word clued 9 times out of 88 clears 10%. The percentage rule threw
+out ERA, AREA, ORE, ALE, ATE, ERR, ETA, ERIE and kept RENU, EHOW, SKORT.
+Counting actual uses measures what a solver has seen.
+
+## Legacy list
+
+`clues_legacy.json` is the list this replaced: **9,023 words, 124,084
+clues**, built on a 7-year window with a 30-unique-clue floor and then
+pruned for standalone solvability. Kept verbatim so it can be restored or
+compared. Its builder is `filter_clues_legacy.py`; the solvability pass is
+`prune_clues.py` with `solvability_prompt.txt`.
 
 ## Format
 
