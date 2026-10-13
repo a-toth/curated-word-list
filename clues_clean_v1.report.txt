@@ -1,0 +1,108 @@
+========================================================================
+Mini word-list curation
+========================================================================
+Source:          clues_filtered.json  (8,423 words)
+Zipf floor:      3.0
+Score floor:     50
+Clues per word:  3
+
+1. Normalize (A-Z, 3-5 letters, >=1 clue)
+   kept 8,423   cut 0
+   len 3: 1,567  len 4: 3,336  len 5: 3,520
+
+2. Legitimacy gate (Spread the Wordlist score >= 50)
+   wordlist entries: 304,410  ->  304,410 A-Z keys
+   kept 7,674   cut 749 (749 scored low, 0 not listed)
+   len 3: 1,354  len 4: 2,919  len 5: 3,401
+   cut, low score: AIRE, ATAN, ATH, CESTA, CHAS, COL, EGEST, ERLE, ESSE, GEHRY, HIES, HOMO, ISAO, LATH, LIDO, LTDS, NSEC, OATEN, OLAV, ONEI, OSE, RIATA, ROUE, SEPAL, UPSY, ... (+724 more)
+
+3. Familiarity gate (Zipf >= 3.0)
+   kept 4,709   cut 2,965
+   len 3: 1,030  len 4: 1,880  len 5: 1,799
+   cut: AMISS, BENE, BIOME, CPAS, CRASS, DACHA, EVERS, GNASH, GOUP, HOSEA, IMPEI, INTOW, LINT, MENSA, NADIR, NONO, PARM, PEPS, PTAS, RAGU, RIPEN, SLEWS, SPATS, SUEY, WILMA, ... (+2,940 more)
+
+4. Drop non-words (proper nouns, abbreviations, multi-word partials)
+   kept 3,607   cut 1,102
+   len 3: 629  len 4: 1,509  len 5: 1,469
+   cut, abbreviation (277): AOL, ASAP, AVE, CEO, CGI, DVD, EMI, HRS, INC, IRS, JFK, LSD, LSU, MON, MRI, NCAA, OCT, PGA, RBI, RNA, TEL, TNT, UPI, URL, USC, ... (+252 more)
+   cut, multiword (44): ALOT, AMI, ASA, DOI, DOIN, EXO, GOTO, IMA, ING, ISO, ITA, KPOP, MAL, NEURO, NON, NOONE, OMNI, PRE, ROBO, TATA, TOGO, TOS, TRI, WIFI, YER, ... (+19 more)
+   cut, proper noun (781): AMMAN, BLU, CLYDE, COCO, COSTA, ELSA, EWING, FIONA, HAITI, HUN, KENT, LEGO, LIV, LOWE, MOE, MOTT, NELL, NIGER, OLEG, REA, RINGO, ROSSI, THOR, YURI, ZELDA, ... (+756 more)
+
+5. Manual lists
+   allowlist 0   blocklist 29
+   forced in 0: -
+   forced out 28: AGAR, AMOR, ATS, DEUS, DIA, DIEM, ESA, FEST, HOLA, MAS, NINO, NITE, PAPI, PAX, QUE, SER, SHUI, TELE, TIA, TORO, TRE, TRES, TWAS, UNA, UNI, ... (+3 more)
+   kept 3,579
+
+6. Clue cleanup (keep 3 plainest per word)
+   kept 3,578 words, 10,726 clues   cut 1 words with no clue left
+   clues dropped, trivia (proper names): 3,463
+   clues dropped, wordplay (?): 1,098
+   clues dropped, gives away the answer: 5
+   cut, no usable clue: WHY
+
+========================================================================
+Result
+========================================================================
+   8,423 words in  ->  3,578 words out (42%)
+   len 3: 616  len 4: 1,493  len 5: 1,469
+   10,726 clues, 3.0 per word
+
+
+Survivors, random sample of 3-letter words
+   ARS  3.22  MGM motto start
+   BON  3.71  "-- voyage!"
+   COO  3.30  Dove's sound
+   DEW  3.52  Morning moisture
+   DUE  5.35  Expected
+   HAI  3.57  Japanese "yes"
+   IRE  3.22  Rage
+   ORE  4.10  Mine yield
+   PAO  3.10  Kung ___ chicken
+   RAM  4.19  Zodiac animal
+   RIM  3.85  Crater part
+   SAY  5.89  Utter
+   SIT  4.90  Take a load off
+   SOL  3.69  Fa follower
+   WAX  3.92  Surfboard application
+
+Survivors, random sample of 4-letter words
+   ACNE  3.66  Clearasil target
+   ARMS  4.82  Weaponry
+   AURA  3.52  Mystique
+   BABE  4.11  Innocent one
+   CHOW  3.43  Grub
+   GAVE  5.25  Donated
+   HEED  3.45  Pay attention to
+   KNOW  6.10  Recognize
+   PALS  3.56  Buddies
+   SANG  4.10  Crooned
+   SONG  5.26  Karaoke selection
+   SUED  3.90  Took to court
+   TOMS  3.08  Male turkeys
+   WAVY  3.24  Undulating
+   YELL  3.85  Holler
+
+Survivors, random sample of 5-letter words
+   ADEPT  3.33  Skilled
+   ALTER  4.05  Change
+   FLAIR  3.54  Panache
+   FOYER  3.09  Entrance hall
+   GIVEN  5.41  Donated
+   GNOME  3.20  Garden statuette
+   METAL  4.82  Rock genre
+   OFTEN  5.41  Frequently
+   PLACE  5.71  Location
+   PRISM  3.44  Spectrum creator
+   SANDY  4.19  Yellow-gray
+   SHEET  4.40  Piece of paper
+   SNAIL  3.67  Slow mover
+   UNITE  3.90  Bring together
+   VEINS  3.76  Blood lines
+
+At the threshold (Zipf 2.75-3.25) - review these to tune --zipf
+   kept:    YELP, WIDEN, UNCUT, TWEED, TIMID, TIERS, TEAL, SUEDE, STOMP, STAG, SOD, SNARE, SCRUM, SAUNA, SAG, PROD, OFT, LEFTY, JUDO, HOE, HENS, FRAT, EMIT, EASED, DAL, BONY, BONA, BALM, ALUM, AHEM, WHEW, WEPT, WAVY, WAIVE, URN, TRAYS, SHUN, RUBS, RIGS, RECON, NIGH, NAW, MAH, KNEEL, IFS, HEM, FORTE, EMO, BULGE, VAPE, VALOR, TRIAD, SLED, SHONE, SASH, POKED, PESOS, NITRO, NEWT, MOOT, MANI, LOTTO, LOOMS, LAIR, LACY, IMP, HORDE, HOARD, GLAM, GATED, EEL, DEB, CLOUT, BUDGE, AROMA, ANNUM, WILT, TINT, TEMPT, SERGE, RIMS, PUMA, PLOY, PINTS, OVENS, NUDGE, NOM, MELEE, IRE, ICH, ERM, EIN, DARES, CLAM, BATHE, ARS, YALL, WIELD, TROT, TRAMP, TOME, TIC, SASSY, RAS, PLOW, PAVE, NEE, LOCO, LICE, IONIC, HERDS, GUMS, FLAKE, FEND, ERAS, COT, BOUTS, BLED, BILE, AUNTS, WAGED, VOLTS, SLABS, RUNG, REPEL, POLKA, OPAL, MAHAL, LOTTA, LIEN, HAUTE, GNOME, GIS, GERM, DEFER, COMO, ANEW, AIRY, ADO, ZEST, SWAG, STEAD, SOAPS, SKIS, S
+   dropped: XMAS, TSP, TAFT, SSR, REES, RAMA, MACH, LUIGI, LSD, KILOS, ISP, ICU, HULU, GUAM, EID, CSI, TUE, TORO, SVEN, SUSIE, SNL, RITZ, RAUL, MAORI, ISSA, IOC, GRETA, CPA, BAS, AOL, ACLU, TESS, SISSY, SEGA, ODIN, NORSE, HERR, FTC, EOS, ASTRO, STU, STE, REGAN, OSU, LEAR, INA, CTRL, ATT, UPTO, SILAS, PRADA, HANA, HALLE, DRS, BOSE, BOCA, TIA, TAHOE, REGIS, RCA, PATTI, NEHRU, MILNE, DANES, CRETE, CELIA, ANI, AKIRA, ZULU, YUKON, TORI, ROMO, PETA, OGDEN, GIGI, EVO, ELY, ELMER, BEALE, YVES, USPS, TESSA, RTS, MSU, IVES, IBIZA, HARI, GENOA, ENZO, EMIL, DOHA, CROWE, AVI, TYNE, SEINE, PAINE, NEMO, JUNO, ISLA, HURON, HOWIE, HORNE, HESS, HAHN, ALDO, YMCA, RINGO, OTC, ONO, MSG, MERYL, LORDE, ITO, EMILE, DADE, ATL, AMOR, YAO, TOTO, SELMA, PCT, OPEC, NYU, LON, ESQ, DIOR, COE, BETTE, ANWAR, ABBA, THU, RIC, OLEG, OLAF, NILES, NELL, MARDI, LYFT, GEORG, CNBC, BERN, ARTIE, ANDES, ALLIE, TMZ, TELE, SHO, SHAY, RAFA, PIS
+
+Wrote clues_clean_v1.json
+Wrote scores_v1.json

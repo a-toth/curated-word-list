@@ -1,0 +1,45 @@
+# blocklist.txt - words forced OUT of the curated output.
+#
+# One word per line, uppercase, A-Z only. Text after # is ignored.
+# The blocklist is applied last and beats the allowlist.
+#
+# These cleared both gates on technicalities: they are common enough in
+# English text to clear the Zipf floor, and they are legitimate crossword
+# entries, but a casual solver does not know them as words.
+
+# --- foreign words ---
+AMOR
+CASA
+DEUS
+DIA
+DIEM
+ESA
+ESE
+HOLA
+ISLA
+MAS
+NINO
+PAPI
+PAX
+QUE
+SER
+TIA
+TORO
+TRE
+TRES
+UNA
+
+# --- prefixes, suffixes and combining forms ---
+FEST
+TELE
+UNI
+
+# --- crosswordese that reads as a fragment, not a word ---
+AGAR
+ATS
+OOP
+SHUI
+
+# --- deliberate misspellings ---
+NITE
+TWAS

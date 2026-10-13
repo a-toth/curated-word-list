@@ -16,16 +16,50 @@ Every `.json` has a matching `.json.gz` (gzip -9, identical contents).
 
 | File | Size | Notes |
 | --- | --- | --- |
-| `clues_filtered.json` | 2.08 MB | the current list: word -> array of clue strings |
-| `clues_filtered.json.gz` | 839 KB | gzip -9 of the above, identical contents |
-| `filter_clues.py` | — | the script that builds them from `clues.tsv` |
-| `clues_legacy.json` | 3.33 MB | the previous list, kept to fall back to |
+**`clues_filtered.json` is the file the game fetches.** It currently holds the
+curated Mini pool, byte-identical to `clues_clean_v1.json`.
+
+| File | Size | Notes |
+| --- | --- | --- |
+| `clues_filtered.json` | 204 KB | **what the game serves** — a copy of the current `clues_clean_vN.json` |
+| `clues_filtered.json.gz` | 84 KB | gzip -9 of the above, identical contents |
+| `clues_clean_v1.json` | 204 KB | the curated Mini pool, frozen: easy words only, 3 clues each |
+| `clues_clean_v1.json.gz` | 84 KB | gzip -9 of the above, identical contents |
+| `scores_v1.json` | 42 KB | word -> Zipf frequency, for weighting the fill |
+| `curate.py` | — | the script that builds `clues_clean_vN.json` from `clues_full.json` |
+| `clues_full.json` | 2.08 MB | the full pool before the familiarity cut — `curate.py`'s input |
+| `clues_full.json.gz` | 839 KB | gzip -9 of the full pool |
+| `filter_clues.py` | — | the script that builds `clues_full.json` from `clues.tsv` |
+| `clues_legacy.json` | 3.33 MB | an older generation, kept to fall back to |
 | `clues_legacy.json.gz` | 1.33 MB | gzip -9 of the legacy list |
 | `filter_clues_legacy.py` | — | the script that built the legacy list |
 
-## Current list: easy words with familiar clues
+### The three generations
 
-Built to favour entries a solver will recognise, on the theory that a word
+`clues_legacy.json` -> `clues_full.json` -> `clues_clean_vN.json`. Each is kept
+rather than replaced, because the Mini is a pure function of (day, word pool)
+and going back to an earlier pool has to stay possible.
+
+### Switching what is served
+
+Copy the version you want over `clues_filtered.json` (and its `.gz`) and push.
+The game needs no edit — its `WORD_DATA_URL` points at that filename. To go
+back to the full pool:
+
+```sh
+cp clues_full.json clues_filtered.json
+cp clues_full.json.gz clues_filtered.json.gz
+```
+
+Swapping the served file changes the puzzle for every day, including days
+already played. That is the cost of pinning by filename instead of by version;
+point the page at `clues_clean_vN.json` directly if that ever matters more than
+the convenience.
+
+## The full pool: `clues_full.json`
+
+`curate.py`'s input, and what the game served until the curated list replaced
+it. Built to favour entries a solver will recognise, on the theory that a word
 is easy when its clue is one they have met many times before.
 
 - 10-year eligibility window (>= 2016)
@@ -54,6 +88,109 @@ appearances. That selects against easy words: ERA is clued 4,528 times, so
 obscure word clued 9 times out of 88 clears 10%. The percentage rule threw
 out ERA, AREA, ORE, ALE, ATE, ERR, ETA, ERIE and kept RENU, EHOW, SKORT.
 Counting actual uses measures what a solver has seen.
+
+## Curated list for the Mini
+
+`clues_filtered.json` selects for words that appear often in crosswords, which
+is not the same as words people know. OGEE, ASTI, EDUCE, SNEE and ANDSO all
+clear its appearance threshold; across a year of generated puzzles the most
+repeated entries were ESSE, SSNS, EENIE, STDS and SNEE. `curate.py` applies the
+two gates an appearance count cannot.
+
+**Legitimacy** — [Spread the Wordlist](https://www.spreadthewordlist.com/)
+scores an entry up to 55, where 50 means "clean": a real entry, not necessarily
+a familiar one. ESSEN, GENOA and PADUA all score 50, so this gate is necessary
+and nowhere near sufficient.
+
+**Familiarity** — general English frequency, via `wordfreq`'s Zipf scale. This
+is the gate that does the work, and `--zipf` is the main dial:
+
+| Zipf | words | len 3 | len 4 | len 5 |
+| ---: | ---: | ---: | ---: | ---: |
+| 2.5 | 4,559 | 744 | 1,873 | 1,942 |
+| 2.8 | 4,036 | 693 | 1,671 | 1,672 |
+| **3.0** | **3,578** | **616** | **1,493** | **1,469** |
+| 3.2 | 3,136 | 550 | 1,331 | 1,255 |
+| 3.5 | 2,497 | 445 | 1,084 | 968 |
+
+v1 ships at 3.0. Quality holds down to about 3.0 — lowering 3.5 to 3.0 buys
+back ZEBRA, HINGE, SUEDE, TOXIN, SHAWL, SMIRK and CHORE — and starts to drift
+below 2.8, where CILIA, TETRA, ADDER, LIKEN and WAHOO come back. At 3.5 the
+five-letter pool falls under a thousand, which is thin for a fully-checked 5x5.
+
+### Building a version
+
+```sh
+python3 curate.py --source clues_full.json --zipf 3.0 --clues 3 \
+                  --out clues_clean_v1.json --scores-out scores_v1.json
+```
+
+Needs `wordfreq` (`pip install wordfreq`) and both Spread the Wordlist
+downloads — `spreadthewordlist.dict` and `spreadthewordlist_forms.dict`. They
+are gitignored, not vendored; see Licensing below. `--freq-file` takes a plain
+`word<TAB>zipf` table instead of `wordfreq`.
+
+Every run prints a report and writes it beside the output
+(`clues_clean_v1.report.txt`): counts and cut samples per step, survivor
+samples with their frequencies, and the words sitting either side of the
+threshold, which is what you read to pick the next `--zipf`.
+
+**Output files are frozen.** The puzzle is a pure function of (day, word
+pool), so overwriting a published version silently rewrites days people have
+already played. Build `clues_clean_v2.json` instead and repoint the page.
+
+### The pipeline
+
+1. **Normalize** — uppercase, `A-Z`, 3-5 letters, at least one clue. 3-letter
+   words are kept even though the current grids only use 4s and 5s.
+2. **Legitimacy** — Spread the Wordlist score >= 50.
+3. **Familiarity** — Zipf >= `--zipf`.
+4. **Drop non-words** — judged from the surface-forms edition, which keeps the
+   original casing, spaces and periods. A word is cleared as soon as one
+   surface form looks ordinary, so DELTA survives on "delta" despite "Delta".
+   This is what catches proper nouns (`Genoa`, `Maine`), abbreviations and
+   their plurals (`USPS`, `ATVs`) and multi-word partials (`a game`, `tee up`,
+   `in app`). Clue text is a second source: a word whose clues mostly say
+   "Abbr." or "for short" goes too.
+5. **Manual lists** — `allowlist.txt` forces a word in past every gate,
+   `blocklist.txt` forces it out and beats the allowlist. The shipped
+   blocklist holds the entries that clear both gates on a technicality:
+   foreign words (HOLA, TORO, UNA), affixes (TELE, UNI) and misspellings
+   (NITE, TWAS).
+6. **Clue cleanup** — drop clues that give away the answer, use `?` wordplay,
+   or carry two or more proper names. Fill-in-the-blank clues are kept: they
+   are easy in a mini even with a name in them, because the phrase does the
+   work. Survivors are ordered plainest first, then capped at `--clues`.
+   Since `clues_filtered.json` is already most-used-first, `clues[0]` is the
+   single most familiar clue for that word.
+7. **Write** the JSON, the optional scores file, and the report.
+
+### Results
+
+**3,578 words, 10,726 clues** — 616 of length 3, 1,493 of length 4, 1,469 of
+length 5, three clues each. 42% of the source survives.
+
+Checked against the game's own generator, lifted out of the page and run
+headless: **730 of 730 days fill**, at 5.1 ms per puzzle, using 1,843 distinct
+words. The most repeated entries become REST, TSAR, ARISE, NEST and ELSE
+instead of ESSE, SSNS and EENIE. Repetition is higher than with the full pool
+(62 appearances over two years, against 12) — the cost of a pool a quarter the
+size, and the reason not to push `--zipf` much above 3.0.
+
+At 204 KB the file is a tenth of `clues_filtered.json`, which also buys margin
+against the page's 4-second fetch timeout.
+
+### Using it in the game
+
+Already live: `clues_filtered.json` is a copy of `clues_clean_v1.json`, and the
+schema is unchanged, so the page needed no edit at all. Two optional follow-ups
+in the page:
+
+- Use `clues[0]` rather than a random clue. The script orders clues for this.
+  (`clues_filtered.json` is already ordered this way, so this works today.)
+- Weight the candidate pool by `scores_v1.json` instead of shuffling
+  uniformly, with seeded randomness inside a tier. Determinism survives
+  because the ordering is fixed by the file.
 
 ## Legacy list
 
@@ -156,7 +293,7 @@ python3 prune_clues.py check work
 python3 prune_clues.py apply work clues_filtered.json
 ```
 
-Re-running `filter_clues.py` overwrites `clues_filtered.json` with the unpruned
+Re-running `filter_clues.py` overwrites `clues_full.json` with the unpruned
 corpus.
 
 ## Serving the `.gz`
@@ -171,6 +308,12 @@ fly anyway, so the plain file is often the simpler choice.
 Clue text originates with the individual puzzle publishers and reaches this
 repo via the xd corpus, which carries its own terms. No license file has been
 chosen for this repository yet — review the upstream terms before reuse.
+
+Spread the Wordlist is licensed **CC BY-NC-SA 4.0**. It is used here only as an
+input filter and is not redistributed — the `.dict` files are gitignored, and
+`clues_clean_vN.json` contains no wordlist data, only which of our own words
+survived. Anything shipped that was built with it needs attribution, and the
+non-commercial term applies.
 
 ---
 

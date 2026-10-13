@@ -1,0 +1,9 @@
+# allowlist.txt - words forced INTO the curated output.
+#
+# One word per line, uppercase, A-Z only. Text after # is ignored.
+# An allowlisted word skips every automatic gate: the Spread the Wordlist
+# score, the Zipf floor and the non-word checks. It still needs at least
+# one clue to survive clue cleanup, and the blocklist still overrides it.
+#
+# Use this for words the gates wrongly reject - an everyday word that
+# wordfreq scores low, or one whose only surface form is capitalized.
