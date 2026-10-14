@@ -5,6 +5,7 @@ Word and puzzle data for word-game generators.
 - **Crossword clues** — 3–5 letter answers with recent clues, filtered from the
   [xd crossword corpus](https://xd.saul.pw/).
 - **Strands** — 730 daily word-search puzzles and a 59,551-word dictionary.
+- **Doublets** — word-ladder dictionaries, 3–8 letters, with a puzzle pool.
 
 Every `.json` has a matching `.json.gz` (gzip -9, identical contents).
 
@@ -422,3 +423,40 @@ they are proper nouns — ACADIA, AKRON, ALGERIA, AMUNDSEN, ATHENS, BALI,
 BELFAST. The dictionary holds common nouns only. If a game validates guesses
 against this file alone, those theme words will be rejected; validate theme
 words against the puzzle's own `words` array first.
+
+---
+
+# Doublets
+
+Word lists for a doublets / word-ladder game, where one letter changes at a
+time and every step must be a real word.
+
+| File | Size |
+| --- | --- |
+| `doublet_words.json` | 310 KB |
+| `doublet_words.json.gz` | 139 KB |
+
+Three buckets, each a strict subset of the one before it:
+
+| Bucket | Words | Lengths | Use |
+| --- | --- | --- | --- |
+| `valid` | 35,225 | 3–8 | every move the player may legally make |
+| `common` | 13,330 | 3–8 | the familiar subset |
+| `pool` | 1,358 | 4–5 | candidate start and end words for a puzzle |
+
+`valid` and `common` are objects keyed by word length, and each value is a
+single string of fixed-width words run together — at length 5,
+`"aarghabackabase..."` is read five characters at a time. Both are sorted,
+lowercase and a-z only, so a reader can slice or binary-search them
+directly:
+
+```js
+const words = (blob, n) => blob.match(new RegExp(`.{${n}}`, "g"));
+words(data.valid["5"], 5);   // ["aargh", "aback", "abase", ...]
+```
+
+`pool` is a plain sorted array instead, since it mixes 4- and 5-letter
+words: 659 of length 4 and 699 of length 5.
+
+Verified on import: every bucket parses evenly into its stated word length,
+`common` is a subset of `valid`, and `pool` is a subset of `common`.
