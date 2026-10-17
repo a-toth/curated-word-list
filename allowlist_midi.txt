@@ -1,0 +1,4 @@
+# allowlist_midi.txt - ordinary English words the --foreign-margin rule
+# catches because a foreign word shares the spelling.
+HOE
+TOT

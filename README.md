@@ -242,6 +242,61 @@ in the page:
   uniformly, with seeded randomness inside a tier. Determinism survives
   because the ordering is fixed by the file.
 
+## Midi pool (9x9 to 11x11)
+
+The same pipeline with the length range opened to 3-11. Frozen as v1:
+`clues_midi_v1.json` (36,706 words, 191,478 clues), `scores_midi_v1.json`
+(word -> Zipf) and `clues_midi_v1.report.txt`. Never overwrite a published
+version; build v2 instead.
+
+```sh
+python3 filter_clues.py clues.tsv clues_recent_midi.json --years 10 \
+        --min-appearances 10 --long-from 6 --long-min-appearances 3 \
+        --min-staple-uses 1 --max-staples 5 --max-fresh 5 \
+        --min-len 3 --max-len 11
+
+python3 curate.py --source clues_recent_midi.json --title Midi \
+        --min-len 3 --max-len 11 --zipf "3-5:2.8,6-7:2.6,8-11:2.3" \
+        --phrases --phrase-offset 0.3 --foreign-margin 3.0 \
+        --allowlist allowlist_midi.txt --blocklist blocklist_midi.txt \
+        --proper-zipf 4.0 --clues 0 \
+        --out clues_midi_v1.json --scores-out scores_midi_v1.json
+```
+
+- **Per-length Zipf floor.** `--zipf` takes `"3-5:2.8,6-7:2.6,8-11:2.3"`. Long
+  words are rarer in ordinary text, so one floor would erase them. Checked by
+  sampling the words either side of each floor: loosening it only adds harder
+  but fair words (ALLERGIST, SCALLION), so the floors stay where they are.
+- **Phrases.** `--phrases` scores glued entries (ONTHEFENCE) from their spaced
+  surface form. Fragments are dropped by shape: a phrase cannot end on an
+  article, preposition or auxiliary ("ate in", "a game of") and a two-word
+  phrase cannot open on an article. Phrasal verbs ("give up") stay. Phrases
+  are held to a floor `--phrase-offset` (0.3) lower than single words.
+- **Foreign words.** `--foreign-margin 3.0` drops entries far more frequent in
+  es/fr/it/de/pt/nl than in English (JAMAISVU, SOTTOVOCE), when English Zipf is
+  under 3.5. Smaller margins also catch real English (EMBARGO, GENIAL, LLAMA),
+  so the remaining foreign entries are in `blocklist_midi.txt` by hand, and
+  `allowlist_midi.txt` rescues HOE and TOT. The Mini's lists are untouched.
+- **Grid-marker clues** are dropped: `*` theme marks, `[brackets]`,
+  enumerations "(3,5)" and dates "(1958)". "(2 wds.)" hints are kept.
+- **Difficulty tiers come from `scores_midi_v1.json`.** One pool, two bars: an
+  easy 9x9 day takes words at Zipf >= 3.3, a hard 11x11 day takes everything.
+
+| len | all | >= 3.3 | >= 3.6 |
+| ---: | ---: | ---: | ---: |
+| 3 | 698 | 526 | 423 |
+| 4 | 1,961 | 1,500 | 1,214 |
+| 5 | 3,232 | 2,354 | 1,860 |
+| 6 | 5,470 | 3,590 | 2,847 |
+| 7 | 7,616 | 5,313 | 4,364 |
+| 8 | 7,240 | 4,814 | 4,032 |
+| 9 | 5,262 | 3,846 | 3,315 |
+| 10 | 3,478 | 2,759 | 2,372 |
+| 11 | 1,749 | 1,410 | 1,222 |
+
+The marker filter also applies to Mini builds now. Re-running v2 gives the same
+5,595 words but 126 fewer clues, so `clues_clean_v2.json` stays frozen.
+
 ## Legacy list
 
 `clues_legacy.json` is the list this replaced: **9,023 words, 124,084

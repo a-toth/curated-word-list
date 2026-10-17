@@ -1,0 +1,274 @@
+========================================================================
+Midi word-list curation
+========================================================================
+Source:          clues_recent_midi.json  (76,258 words)
+Zipf floor:      3-5:2.8,6-7:2.6,8-11:2.3
+Phrases:         on (up to 4 words, floor 0.3 lower)
+Score floor:     50
+Clues per word:  0
+
+1. Normalize (A-Z, 3-11 letters, >=1 clue)
+   kept 76,258   cut 0
+   len 3: 2,368  len 4: 5,461  len 5: 8,682  len 6: 15,072  len 7: 15,822  len 8: 12,061  len 9: 8,297  len 10: 5,482  len 11: 3,013
+
+2. Legitimacy gate (Spread the Wordlist score >= 50)
+   wordlist entries: 304,410  ->  304,410 A-Z keys
+   kept 64,894   cut 11,364 (10,996 scored low, 368 not listed)
+   len 3: 1,596  len 4: 3,650  len 5: 7,068  len 6: 9,989  len 7: 15,124  len 8: 11,483  len 9: 7,868  len 10: 5,290  len 11: 2,826
+   cut, low score: ARDORS, BEETROOT, BRONCS, BUSSES, DANNER, DAPS, DELIST, FONZ, GUMBEL, HAVOLINE, IDYL, ITHAD, JETCAR, MAACO, MORTEM, NOAVAIL, ODEA, PRIVY, RAMPAL, RFID, ROCKIT, SEATO, TABLELEGS, TIDING, TROYES, ... (+10,971 more)
+   cut, not listed: APESHIT, BCSERA, BRIDGED, BUGFIX, CROATIANS, CYANATE, FIFTIES, GRANDCREW, GUNNERS, IAMMAD, INLANE, IPADOS, LANGLANG, MADEAMESSOF, MISSIT, NEARME, PASSIT, PAWPAD, PICKALANE, PLUMPIE, RATEPLAN, SLANKET, SPATUP, SUPINEWAVE, WHATNO, ... (+343 more)
+
+3. Familiarity gate (Zipf >= 3-5:2.8,6-7:2.6,8-11:2.3)
+   phrases scored from their spaced form: 16,811 (floor 0.3 lower); 1,576 cut as sentence fragments
+   fragments: ANSWEREDTO, BUMPSINTO, CUEDIN, CUEIN, DARNIT, GAZESAT, GRINAT, HADTOBE, HOPESFOR, INTENDTO, LOOKSAT, NAILIT, OPENTO, PAIDFOR, REELINGIN, RIPINTO, SAMEAS, SAYYESTO, SENDSTO, SOFARAS, STAYIN, STORMSIN, TRIESTO, WORKSAT, WROTETO, ... (+1,551 more)
+   kept 41,703   cut 23,191
+   len 3: 1,308  len 4: 2,535  len 5: 4,081  len 6: 6,482  len 7: 8,528  len 8: 7,829  len 9: 5,558  len 10: 3,597  len 11: 1,785
+   cut: ARFED, CALRIPKEN, CAPRISUN, DAWNSTALEY, DBACKS, DENUDES, FROTH, HAZYIPA, HOLDIT, IMBUSY, ITSABOY, JACKSONHOLE, LUM, MOHANDAS, NEUTROGENA, ODORANT, PRESALES, RAFAELNADAL, RESOD, RIORITA, SAWEETIE, SPRITZER, SVELTE, TERN, ZENKOANS, ... (+23,166 more)
+
+4. Drop non-words (proper nouns, abbreviations, multi-word partials)
+   kept 37,146   cut 4,557
+   len 3: 745  len 4: 2,035  len 5: 3,299  len 6: 5,518  len 7: 7,675  len 8: 7,288  len 9: 5,310  len 10: 3,515  len 11: 1,761
+   cut, abbreviation (466): ANS, BCE, CBD, DEPT, ENG, EXE, FIFA, HRT, IMAX, IOC, ISS, MGR, MLA, MPG, MSG, NYC, PAK, SRS, SSD, TBH, UNC, USAF, WWE, WWF, YOLO, ... (+441 more)
+   cut, foreign (48): AVEC, BIEN, COMO, DERIEN, ENTRENOUS, FAIRE, GRACIAS, HASTAMANANA, ICH, MOLTOBENE, NOMAS, NOMEGUSTA, NUMEROUNO, PASDEDEUX, PERO, PERSONAS, POCOAPOCO, SEI, SOTTOVOCE, TEM, TETEATETE, TOUT, TRA, TRALA, TRESBIEN, ... (+23 more)
+   cut, multiword (102): AMI, AUTOTUNE, BULLSEYE, CALLIN, DOIN, EPI, ESE, FALLIN, GEO, GOIN, IMA, INTRA, ISH, IST, MAL, MID, MULTI, NEO, NON, PLAYIN, PRE, PSEUDO, ROBO, STAYIN, WESTSIDE, ... (+77 more)
+   cut, proper noun (3,941): ANDOVER, BRITON, BRITTEN, CROATIA, DOROTHY, ELTON, EVEREST, GORE, HASSAN, HOFFMAN, IMOGEN, KOBE, KYRIE, LEONA, LILA, MINA, ROVER, RUBIN, SCOTTY, SORIANO, STEVENS, TOYOTA, TRAVOLTA, UNIX, VERGARA, ... (+3,916 more)
+   kept, proper noun above Zipf 4.0 (548): ARNOLD, BRANDON, CAROLINE, CELTIC, CHARLES, DELHI, DEMOCRAT, DIANA, HOLLYWOOD, JAMES, JEREMY, JUNE, LATIN, LEONARD, MANHATTAN, MISSOURI, OCTOBER, PATRICK, PUTIN, STAN, STEWART, SYRIA, TRAVIS, UKRAINE, WRIGHT, ... (+523 more)
+
+5. Manual lists
+   allowlist 2   blocklist 213
+   forced in 0: -
+   forced out 180: AMOR, ARTE, BONITA, BONJOUR, CHICO, CINCO, EDDIE, FRAU, GRAN, INTEL, JOJO, KIM, MANO, MONAMI, NANO, NOM, PAX, PENDANT, PIED, PLAYA, QUE, SLYNODS, SUI, TEAMO, TORO, ... (+155 more)
+   kept 36,966
+
+6. Clue cleanup (no cap plainest per word)
+   kept 36,706 words, 191,478 clues   cut 260 words with no clue left
+   clues dropped, trivia (proper names): 12,213
+   clues dropped, wordplay (?): 10,150
+   clues dropped, grid marker (*, [], enumeration, date): 3,474
+   clues dropped, trivia (name needed): 2,666
+   clues dropped, time-bound: 275
+   clues dropped, censored or placeholder: 114
+   clues dropped, gives away the answer: 7
+   of those, proper nouns with no name-free clue (110): AMY, BENNETT, BROOKLYN, CAMERON, DUBLIN, FRANCE, GREG, HARVEY, HOWARD, JEREMY, JEWISH, JON, JUSTIN, LINDA, LIVERPOOL, MANHATTAN, MARC, MATT, MORGAN, NETFLIX, NIGERIAN, SARAH, SIMON, STEWART, WILLIAMS, ... (+85 more)
+   cut, no usable clue: AREYOUME, BATHTUBGIN, BROOKLYN, DOORONE, FRANCE, HAPPYNOW, INLEFT, JENNIFER, LEVITATING, MAKEITWORK, MARGARET, MYPRETTY, OAKDESK, SARAH, SCREENPLAY, SETTINGSUN, SIMON, SPIRITUAL, STATEMOTTO, TOGATOGA, TRANSICON, TRAVIS, WARMOVIE, WHOSAID, WILDPIG, ... (+235 more)
+
+========================================================================
+Result
+========================================================================
+   76,258 words in  ->  36,706 words out (48%)
+   len 3: 698  len 4: 1,961  len 5: 3,232  len 6: 5,470  len 7: 7,616  len 8: 7,240  len 9: 5,262  len 10: 3,478  len 11: 1,749
+   191,478 clues, 5.2 per word
+
+   WARNING: only 698 words of length 3 (warn below 1,500).
+
+Phrases kept: 16,481
+   len 3: 1
+   len 4: 40
+   len 5: 307
+   len 6: 1,219
+   len 7: 3,274
+   len 8: 3,632
+   len 9: 3,530
+   len 10: 2,895
+   len 11: 1,583
+
+   ATAHALT        at a halt                3.93  No longer moving
+   AUCOURANT      au courant               2.54  In the know
+   BARGRAPH       bar graph                4.00  Alternative to a pie chart
+   BARNBURNER     barn burner              3.41  Extremely exciting event
+   BOXTOP         box top                  4.93  Certain proof of purchase
+   COOLAIR        cool air                 4.94  Fan's creation
+   CUMLAUDE       cum laude                2.95  Diploma phrase
+   FELLFLAT       fell flat                4.48  Bombed, as a gag
+   GIFTSHOP       gift shop                4.53  Souvenir seller
+   GOLDSTAR       gold star                4.88  Reward for good schoolwork
+   GOTNAKED       got naked                4.42  Lost at strip poker
+   GROWINGOLD     growing old              4.88  Getting on in years
+   HALFNOTE       half note                4.89  It resembles a d on sheet music
+   HANDINHAND     hand in hand             5.11  Closely associated
+   HAVEATASTE     have a taste             4.72  Sample
+   INREALTIME     in real time             5.51  As it happens
+   LAVENDEROIL    lavender oil             3.43  Aromatherapy bottle
+   LETFLY         let fly                  4.69  Uncork, so to speak
+   MADEAMESS      made a mess              4.55  Had lots of cleaning up to do
+   MOVIESTAR      movie star               4.87  Hollywood bigwig
+   ONTHERECORD    on the record            5.20  How public statements are made
+   PANFLUTE       pan flute                3.47  Instrument made from pipes
+   PENCAPS        pen caps                 3.95  Ballpoint covers
+   RARAAVIS       rara avis                2.21  Exceptional thing
+   REDMEAT        red meat                 4.55  Carnivore's craving
+   RELAXEDFIT     relaxed fit              3.96  Comfortable, like jeans
+   RENTSTRIKE     rent strike              4.32  Collective action by a group of tenants
+   RIDEOUT        ride out                 4.84  Weather
+   RIGHTANGLE     right angle              4.37  Part of a square
+   RUMORMILL      rumor mill               3.64  Dirt spreader
+   SAYAGAIN       say again                5.48  "Repeat, please"
+   SHEDATEAR      shed a tear              3.98  Clip wool from (4 to 7)
+   SOUNDBATH      sound bath               4.36  Immersive aural meditation experience
+   STARTERSET     starter set              4.01  Collection consisting of four plates, four saucers, four bowls, etc.
+   STORYTIME      story time               5.39  Bedtime ritual for some parents
+   TEABISCUIT     tea biscuit              3.43  Cookie at a social
+   TEAMLEADER     team leader              4.87  Captain
+   TEAMPHOTO      team photo               4.89  Snap on a football field, perhaps
+   TOPSURGERY     top surgery              4.58  Gender-affirming procedure for some trans people
+   YUMYUM         yum yum                  3.16  Syllables said while rubbing one's tummy
+
+Survivors, random sample of 3-letter words
+   APS  3.12  Courses for coll. credit
+   BIB  2.97  Clothing protector
+   CAD  3.41  Scoundrel
+   CRY  4.59  Weep
+   DEL  4.32  Ctrl-Alt-___
+   FOO  3.34  Rock's ___ Fighters
+   HEN  3.56  Egg layer
+   MOB  4.03  Unruly crowd
+   MUS  3.02  Greek consonants
+   PAT  4.24  Bit of butter
+   POD  3.71  Group of whales
+   QUO  3.78  Status --
+   RAT  4.17  Snitch
+   SUM  4.34  Total
+   WOE  3.31  Misery
+
+Survivors, random sample of 4-letter words
+   ACID  4.45  Battery fluid
+   BUMP  3.98  Jostle
+   DYED  3.43  Changed the color of
+   FILM  5.20  Movie
+   GLUT  2.81  Oversupply
+   KITE  3.55  Toy with a tail
+   LAMP  4.05  Genie's home
+   PACE  4.38  Tempo
+   PEAS  3.65  Carrots' mates
+   ROSE  4.82  Valentine flower
+   SECS  3.12  Brief moments
+   SOAK  3.61  Drench
+   SOLD  4.97  Auctioneer's cry
+   TALE  4.29  Story
+   WHEY  3.05  Curds' partner
+
+Survivors, random sample of 5-letter words
+   AGONY  3.60  Extreme pain
+   ANVIL  3.04  Blacksmith's block
+   ARGON  2.86  Inert gas
+   ASIAN  4.69  Like most of the world's people
+   ATLAS  3.80  Book of maps
+   FINER  3.40  The ___ things in life
+   FLASH  4.45  Camera feature
+   MERCY  4.25  Compassion
+   OPTIC  3.65  Eye-related
+   PEELS  2.80  Spa treatments
+   RIFLE  4.18  Rummage (through)
+   SELLS  4.09  Hawks
+   SHOTS  4.63  Attempts
+   TRIAD  3.23  Three-note chord
+   WARDS  3.64  Hospital sections
+
+Survivors, random sample of 6-letter words
+   ARREST  4.55  Take into custody
+   COSMIC  3.78  Universal
+   DEPART  3.67  Leave
+   GENTLE  4.17  Docile
+   HUSTLE  3.70  Get a move on
+   JESTER  2.96  Court clown
+   JUICES  3.42  Breakfast buffet array
+   NEURAL  3.76  Kind of network
+   OBTUSE  3.04  Slow-witted
+   PREFIX  3.23  Anti or semi
+   RADIUM  2.80  Curie discovery
+   SOLDER  3.11  Welding alloy
+   SPILLS  3.35  Falls
+   THAWED  2.71  No longer frozen
+   WAITER  3.61  Bistro worker
+
+Survivors, random sample of 7-letter words
+   AWARDED  4.35  Bestowed
+   FANCIER  2.60  Enthusiast
+   FROSTED  3.03  Iced, as a cupcake
+   JAVELIN  2.90  Decathlon event
+   MILLION  5.33  "Thanks a ___"
+   NURSING  4.32  Care career
+   REACTED  3.64  Cried or laughed, for example
+   REFUSED  4.54  Said "no"
+   ROAMING  3.50  Cell surcharge
+   SCALPEL  2.76  Surgeon's tool
+   SEMINAL  3.27  Formative
+   THICKEN  2.71  Add cornstarch to
+   TYPICAL  4.59  Hardly surprising
+   UPSCALE  3.29  High-end
+   VACANCY  3.65  Motel sign word
+
+Survivors, random sample of 8-letter words
+   ALOPECIA  2.66  Hair loss
+   BEAUTIES  3.39  Knockouts
+   BRUNETTE  3.40  Brown-haired
+   CONTESTS  3.70  Challenges
+   ICEBERGS  2.66  Arctic floaters
+   INSULATE  2.83  Prevent heat from escaping
+   MAHARAJA  2.71  Hindu royal
+   MILLINER  2.38  Hatmaker
+   NAMESAKE  3.10  Junior, e.g.
+   OBEDIENT  3.19  Well-behaved
+   ORDNANCE  3.37  Artillery
+   RICOCHET  2.75  Glancing rebound
+   SOFTWARE  4.77  Computer programs
+   SUPERIOR  4.46  High-quality
+   UNEASILY  2.33  In a disturbed way
+
+Survivors, random sample of 9-letter words
+   ADJECTIVE  3.34  Descriptor descriptor
+   ANOMALIES  3.28  Abnormalities
+   CLUTTERED  2.94  Full of junk
+   COLLAPSED  3.92  Imploded
+   CRUSADERS  3.35  Passionate activists
+   DETERRENT  3.33  Curb
+   FALLACIES  2.78  Misconceptions
+   INCEPTION  3.65  2010 sci-fi thriller with main characters who are "extractors"
+   NEWSSTAND  2.58  Its proprietors have issues!
+   PLEASURES  3.54  Enjoyable activities
+   PREVENTED  4.09  Forestalled
+   RECEIVERS  3.67  Pass catchers
+   ROADSIDES  2.35  Produce stand sites
+   SOAPSTONE  2.33  Countertop material
+   TEMPORARY  4.48  Short-term
+
+Survivors, random sample of 10-letter words
+   ACCUMULATE  3.48  Gather
+   CONFIDENCE  4.65  Belief in oneself
+   HAMMERHEAD  2.68  Aptly named shark
+   INEXORABLE  2.57  Bound to happen
+   NIGHTSTAND  2.72  Bedside surface for an alarm clock
+   ORANGUTANS  2.53  In 2014 Argentina became the first country to recognize these primates' legal rights
+   PIONEERING  3.54  Ahead of its time
+   PROTOTYPES  3.25  Preliminary working models
+   SMARTPHONE  4.06  All-in-one device
+   THREADBARE  2.43  Shabby
+   TIEBREAKER  2.82  Crucial vote
+   TRAMPOLINE  3.14  Acrobat's apparatus
+   UNIVERSITY  5.39  Brown, e.g.
+   VOCABULARY  3.82  All the words that you know
+   WILDFLOWER  2.69  Pretty plant that wasn't planted
+
+Survivors, random sample of 11-letter words
+   AFGHANISTAN  4.23  Kabul's country
+   BITTERSWEET  3.24  Emotionally complex, in a way
+   DOMINEERING  2.69  Bossy
+   DRAGONFLIES  2.55  Long-bodied insects
+   MASTERPIECE  3.81  Chef-d'œuvre
+   MISSISSIPPI  4.19  2,320-mile river
+   MOTHERBOARD  3.16  Computer part
+   PERSONALITY  4.55  Freudian study
+   PHILIPPINES  4.29  1521 Magellan landing site
+   PLANETARIUM  2.74  Place to see stars indoors
+   SALESPERSON  2.84  Pitching pro
+   SCREENSAVER  2.55  Program designed to prevent "burn-in"
+   SHOWSTOPPER  2.38  Broadway number that brings the house down
+   STORYBOARDS  2.34  Filmmakers' organizing spaces
+   SUPERMARKET  3.78  Large grocery
+
+At the threshold (+/-0.25 Zipf of each length's floor) - review these to tune --zipf
+   kept:    ZIG, WHEY, TRAMS, TEENY, SUES, STABS, SMOG, SLUGS, SKA, RUMP, RARER, QUARK, PICO, MEA, MAGS, LEAPT, JAG, HISS, HASNT, FLAX, EMU, EMIR, DIVAS, CUSP, CRUX, COOLS, BOSOM, BOD, BEET, ASP, YOLK, YAM, WINCH, TROVE, SWAMI, STAVE, SNIPE, SMIRK, RUPEE, POISE, PETAL, MUSES, MOCKS, KOALA, KHAKI, JETTY, HUTCH, HONED, HOLED, GOODY, GNU, FUSSY, FRIAR, FORAY, EBB, DROOL, DICED, DECOY, CRAMP, COB, CMON, CADRE, CABAL, ANVIL, YEW, YANKS, WAG, VIGOR, VEE, ULCER, TWIG, TOOT, TOON, TOIL, TIFF, TAS, SUVS, SORES, SCION, RONDO, RIA, PUSS, MIO, KEBAB, ERODE, CROCK, CEDED, BOOS, BODE, BLOT, AMOUR, ZED, VEER, TUTU, SPECK, SOOT, SILO, SIFT, SHAG, REEDS, NACHO, MUS, MORAY, MINTS, MINCE, LONGS, KNOBS, KETO, JOLT, GRAZE, GAH, FAWN, FANGS, EMITS, CHINO, CHIA, BUFFS, AXIOM, YETI, WARTS, VICES, UMP, TYPOS, TSK, TAMED, SWIMS, SNORT, SKEW, SHH, SEER, SAHIB, RUNE, RUDDY, ROUX, QUART, POX, ORC, OHM, OARS, MOMO, MEATY, LINGO,
+   dropped: TBS, SWEDE, PRIUS, MAUDE, LUCIE, LILA, LEIA, GALLO, CST, CITI, ATF, ARGUS, SUS, SOCHI, RAOUL, RAMBO, PTA, PMS, PAPI, MTG, MONDE, MERLE, MACS, LOREN, LEXI, LEES, KOS, JPEG, FISK, FEMA, DRACO, DIEM, ATA, ASU, ASTRA, ADV, ACCRA, WNBA, WACO, UTE, TRU, SYN, SUI, NATS, MILA, MERCK, MAYS, MARGO, LOEB, HVAC, DUNNE, COHN, BENIN, BANTU, AVEC, ASSN, AMER, USAF, SSE, SABRE, RSVP, PIUS, PIED, PDT, KATO, JANUS, IRMA, GUMP, ELMO, CREE, ANYA, AISHA, AGAR, XEROX, TWAS, TEMPE, SHUI, RHEA, PARR, PARMA, OOP, OATES, NEILL, LOHAN, KPOP, INCA, EXO, EEG, CLEO, CDR, CABOT, ATS, ANIL, WSJ, UPI, TUNIS, TANIA, SXSW, PEI, NOLA, NITE, NDA, MOTT, MES, JETER, EWAN, EROS, EPSOM, DMC, CSU, CBT, BRB, ASL, ARR, AOC, UTICA, TERI, PRIMO, OLA, OAHU, MOBIL, LOTTE, JONI, GRECO, GED, GAR, DARA, CAJUN, BADER, ARGO, AIMEE, VOLTA, VINNY, VIMEO, TUPAC, THEA, SRS, SAGAN, RIGA, RHETT, PUGET, PHNOM, PETRI, OSS, ORI, NOOR, NEA, MENA, MC
+
+Wrote clues_midi_v1.json
+Wrote scores_midi_v1.json

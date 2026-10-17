@@ -1,0 +1,250 @@
+# blocklist.txt - words forced OUT of the curated output.
+#
+# One word per line, uppercase, A-Z only. Text after # is ignored.
+# The blocklist is applied last and beats the allowlist.
+#
+# These cleared both gates on technicalities: they are common enough in
+# English text to clear the Zipf floor, and they are legitimate crossword
+# entries, but a casual solver does not know them as words.
+
+# --- foreign words ---
+AMOR
+CASA
+DEUS
+DIA
+DIEM
+ESA
+ESE
+HOLA
+ISLA
+MAS
+NINO
+PAPI
+PAX
+QUE
+SER
+TIA
+TORO
+TRE
+TRES
+UNA
+
+# --- prefixes, suffixes and combining forms ---
+FEST
+TELE
+UNI
+
+# --- crosswordese that reads as a fragment, not a word ---
+AGAR
+ATS
+OOP
+SHUI
+
+# --- deliberate misspellings ---
+NITE
+TWAS
+
+# --- people and brands re-admitted by --proper-zipf ---
+# A familiar proper noun is fine when it is also an ordinary word or a place
+# (EARTH, IOWA, TOKYO, BOB, LEE, MAC, BRAD, TOM, PETER all stay). These are
+# only ever a person or a product, so every clue for them is trivia.
+ADAMS
+ALI
+ALICE
+ALLEN
+ANDY
+ANN
+CARL
+CHAN
+DAVE
+DIANA
+DIEGO
+EDDIE
+EMMA
+EVANS
+INTEL
+ISIS
+JACOB
+KATE
+KIM
+LISA
+LOGAN
+LUCAS
+LUKE
+MARIA
+NEIL
+OBAMA
+PETE
+PHIL
+RON
+ROSS
+SCOTT
+SONY
+STAN
+SUSAN
+TODD
+
+# --- foreign vocabulary surfaced by the lower Zipf floor ---
+# These clear the frequency gate because foreign words appear in English
+# text, but a mini solver should not need Spanish, French, German or Latin.
+# Naturalised borrowings stay: BERET, BRIE, CREPE, TAPAS, CIAO, ADIEU, ADIOS.
+ACH
+AGUA
+AIME
+AMIE
+AMIGA
+AMIS
+AMO
+AMORE
+ANNO
+AVEC
+BENE
+BLEU
+CARTA
+COTTA
+DAS
+DER
+DIAS
+ECOLE
+EIN
+EINE
+ESO
+ESTA
+ESTE
+FRAU
+ICH
+ICI
+LES
+MADRE
+MAGNA
+MANO
+MOI
+OCHO
+OLA
+OLE
+ORO
+OSO
+OUI
+PADRE
+PERE
+ROI
+SEL
+SENOR
+TETE
+TIO
+UNE
+VON
+
+# --- affixes and abbreviations that slipped the gates ---
+HEMI
+KPH
+MAG
+NANO
+SOL
+
+# --- fragments surfaced by the wider source ---
+BUENO
+CHICO
+ENTRE
+FEMME
+HOY
+KMS
+MES
+MONDE
+PALEO
+PERO
+PLAYA
+POLY
+ROJO
+TAL
+JOJO
+
+# --- partials the surface-form rule missed ---
+ASSED
+HODGE
+
+# --- Midi additions: foreign words and phrases (reviewed from the
+# --foreign-margin 2.0-3.0 band, plus a few wordfreq cannot score) ---
+AMERICANO
+ARTE
+AVANT
+BETENOIRE
+BLANCO
+BOAS
+BONITA
+BONJOUR
+BUENA
+CALIENTE
+CAMINO
+CIAO
+CINCO
+CIUDAD
+COMER
+COMOESTA
+DEJA
+EAU
+ETAT
+EXNIHILO
+FAMILIA
+GAR
+GRAN
+GRATIS
+HOMBRE
+HORS
+ITALIANO
+LIBRE
+LINGUA
+MEIN
+MILLE
+MOT
+MUTTER
+NADA
+NORTE
+NOM
+NOUVEAU
+ORA
+OYVEY
+PAI
+PASSER
+PAZ
+PENDANT
+PERFECTO
+PETIT
+PIED
+PRIMA
+PRIMAVERA
+PRIMO
+QUATTRO
+RAISON
+SABER
+SERA
+SIGNOR
+SOUS
+SUI
+TEAMO
+TEATRO
+TERRE
+TIERRA
+TROIS
+UNIS
+VIDA
+VIE
+VOS
+WELT
+
+# --- Midi additions: weak or invented-looking phrases from a phrase review ---
+ANKLETAT
+ANKLETATS
+ARTBRUT
+CARAMIA
+DENADA
+EAREDSEAL
+EAUDEVIE
+FRATBRO
+MONAMI
+ONETWOS
+SLYNODS
+TAPAKEG
+TIMELAGS
+TORTLAW
+VENTILATTE

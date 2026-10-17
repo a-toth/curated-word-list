@@ -112,7 +112,9 @@ def current_year():
 
 def process(input_path, output_path, min_appearances=MIN_APPEARANCES,
             min_staple_uses=MIN_STAPLE_USES, max_staples=MAX_STAPLES,
-            max_fresh=MAX_FRESH_CLUES, eligibility_years=ELIGIBILITY_YEARS):
+            max_fresh=MAX_FRESH_CLUES, eligibility_years=ELIGIBILITY_YEARS,
+            min_len=MIN_LEN, max_len=MAX_LEN,
+            long_from=None, long_min_appearances=None):
     year_now = current_year()
     eligibility_from = year_now - eligibility_years
     content_from = year_now - CONTENT_YEARS
@@ -147,7 +149,7 @@ def process(input_path, output_path, min_appearances=MIN_APPEARANCES,
                 continue
 
             answer = answer.strip().upper()
-            if not (MIN_LEN <= len(answer) <= MAX_LEN):
+            if not (min_len <= len(answer) <= max_len):
                 continue
             if not LETTERS_ONLY.match(answer):
                 continue
@@ -174,7 +176,13 @@ def process(input_path, output_path, min_appearances=MIN_APPEARANCES,
 
     for word, clue_counts in counts.items():
         appearances = sum(clue_counts.values())
-        if appearances < min_appearances:
+        # Long answers appear far less often per word than short ones, so a
+        # single bar would erase them. --long-from sets where a lower one
+        # starts.
+        needed = min_appearances
+        if long_from and len(word) >= long_from and long_min_appearances:
+            needed = long_min_appearances
+        if appearances < needed:
             dropped_thin += 1
             continue
 
@@ -237,6 +245,11 @@ if __name__ == '__main__':
                         f'staple rule off (default: {MIN_STAPLE_USES})')
     p.add_argument('--max-staples', type=int, default=MAX_STAPLES)
     p.add_argument('--max-fresh', type=int, default=MAX_FRESH_CLUES)
+    p.add_argument('--min-len', type=int, default=MIN_LEN)
+    p.add_argument('--max-len', type=int, default=MAX_LEN)
+    p.add_argument('--long-from', type=int, default=None,
+                   help='answers this long or longer use --long-min-appearances')
+    p.add_argument('--long-min-appearances', type=int, default=None)
     p.add_argument('--years', type=int, default=ELIGIBILITY_YEARS,
                    help='clue window in years; clues older than this are not '
                         'collected at all, and a word with nothing inside it '
@@ -245,4 +258,5 @@ if __name__ == '__main__':
     process(a.input, a.output,
             a.min_appearances_pos if a.min_appearances_pos is not None
             else a.min_appearances,
-            a.min_staple_uses, a.max_staples, a.max_fresh, a.years)
+            a.min_staple_uses, a.max_staples, a.max_fresh, a.years,
+            a.min_len, a.max_len, a.long_from, a.long_min_appearances)

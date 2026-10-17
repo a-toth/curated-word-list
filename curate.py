@@ -116,10 +116,15 @@ def load_frequencies(path):
 
 
 def frequency_lookup(freq_file):
-    """Return zipf(word) -> float, from wordfreq or a supplied table."""
+    """Return zipf(word) -> float, from wordfreq or a supplied table.
+
+    The lookup accepts spaced text too ("on the fence"): wordfreq scores a
+    multi-word string by combining its tokens' frequencies. A --freq-file
+    table only knows single keys, so phrases score 0 there.
+    """
     if freq_file:
         table = load_frequencies(freq_file)
-        return lambda w: table.get(w, 0.0)
+        return lambda w: table.get(w.replace(' ', '').upper(), 0.0)
     try:
         from wordfreq import zipf_frequency
     except ImportError:
@@ -129,6 +134,97 @@ def frequency_lookup(freq_file):
             "or supply a table of 'word<TAB>zipf' lines with --freq-file."
         )
     return lambda w: zipf_frequency(w.lower(), 'en')
+
+
+FOREIGN_LANGS = ('es', 'fr', 'it', 'de', 'pt', 'nl')
+
+
+def foreign_lookup():
+    """foreign(text) -> best Zipf of `text` in Spanish, French, Italian,
+    German, Portuguese or Dutch, or 0.0 when wordfreq is not available."""
+    try:
+        from wordfreq import zipf_frequency
+    except ImportError:
+        return lambda text: 0.0
+    return lambda text: max(zipf_frequency(text.lower(), lang)
+                            for lang in FOREIGN_LANGS)
+
+
+def parse_zipf_spec(spec):
+    """Turn "2.8" or "3-5:2.8,6-7:2.5,8-11:2.2" into floor(length) -> float.
+
+    Longer words are rarer in ordinary text, so one floor either wipes out
+    the long entries or lets the short ones in. A per-length table lets the
+    long end be tuned on its own. A bare number applies to every length.
+    """
+    spec = str(spec).strip()
+    if ':' not in spec:
+        value = float(spec)
+        return lambda length: value
+    bands = []
+    for part in spec.split(','):
+        span, _, value = part.partition(':')
+        lo, _, hi = span.strip().partition('-')
+        bands.append((int(lo), int(hi or lo), float(value)))
+
+    def floor(length):
+        for lo, hi, value in bands:
+            if lo <= length <= hi:
+                return value
+        # Outside every band: use the nearest one, so a stray length is
+        # judged by its closest neighbour instead of silently passing.
+        nearest = min(bands, key=lambda b: min(abs(length - b[0]),
+                                               abs(length - b[1])))
+        return nearest[2]
+    return floor
+
+
+# ---------------------------------------------------------------------------
+# Phrases
+# ---------------------------------------------------------------------------
+
+# Words a phrase cannot end on: "ate in", "a game of", "tee up the" are
+# pieces of a sentence, not entries. A phrasal verb ("give up", "pick up")
+# is fine, so "up", "out", "off", "on" and "over" are NOT here.
+DANGLING_END = {
+    'a', 'an', 'the', 'of', 'in', 'at', 'by', 'for', 'to', 'with', 'as',
+    'or', 'and', 'but', 'is', 'are', 'was', 'be', 'it', 'its', 'that',
+    'this', 'than', 'from', 'into', 'my', 'your', 'our', 'his', 'her',
+}
+# A leading article makes a two-word entry a fragment ("a game", "the end").
+LEADING_ARTICLE = {'a', 'an', 'the'}
+
+
+def phrase_surfaces(surfaces):
+    """Plain lowercase multi-word surface forms: "on the fence", "give up".
+
+    Capitalized phrases are proper nouns or titles and are left to the
+    proper-noun rule. Hyphenated forms ("well-known") count as phrases.
+    """
+    found = []
+    for surface in surfaces:
+        body = surface.strip()
+        if ' ' not in body and '-' not in body:
+            continue
+        if body != body.lower() or '.' in body:
+            continue
+        tokens = re.split(r'[ \-]+', body)
+        if len(tokens) < 2 or not all(t.isalpha() for t in tokens):
+            continue
+        found.append(' '.join(tokens))
+    return found
+
+
+def phrase_ok(phrase, max_words):
+    """Structural check that a phrase stands on its own as an entry."""
+    tokens = phrase.split()
+    if len(tokens) > max_words:
+        return False
+    if tokens[-1] in DANGLING_END:
+        return False
+    if len(tokens) == 2 and tokens[0] in LEADING_ARTICLE:
+        return False
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -267,6 +363,23 @@ def proper_names(clue):
     return names
 
 
+# Clues that only work inside the themed grid they came from: a leading or
+# stray "*" marks a theme entry, [brackets] are stage directions and rebus
+# notes, "(3,5)" and "(1958)" are enumerations and dates, and "(Abbr.)" tags
+# turn up on words that are not abbreviations. A "(2 wds.)" hint is NOT here:
+# it tells a solver a phrase is a phrase, which helps with long entries.
+GRID_MARKER = re.compile(
+    r'''
+      \*
+    | ^\s*\[ | \]\s*$
+    | \(\s*\d+(?:\s*(?:,|and|&|-)\s*\d+)*\s*\)\s*$
+    | \(\s*(?:19|20)\d\d(?:\s*-\s*\d+)?\s*\)
+    | \((?:abbr|var|slang|informal)\.?\)
+    ''',
+    re.I | re.X,
+)
+
+
 def clue_verdict(word, clue, strict=False):
     """(drop_reason, penalty) for one clue.
 
@@ -283,6 +396,8 @@ def clue_verdict(word, clue, strict=False):
     """
     if CENSORED.match(clue):
         return 'censored or placeholder', 0
+    if GRID_MARKER.search(clue):
+        return 'grid marker (*, [], enumeration, date)', 0
     if TIME_BOUND.search(clue):
         return 'time-bound', 0
     if contains_answer(word, clue):
@@ -350,10 +465,13 @@ def curate(args):
         raw = json.load(f)
 
     say("=" * 72)
-    say("Mini word-list curation")
+    say(f"{args.title} word-list curation")
     say("=" * 72)
     say(f"Source:          {args.source}  ({len(raw):,} words)")
     say(f"Zipf floor:      {args.zipf}")
+    if args.phrases:
+        say(f"Phrases:         on (up to {args.max_phrase_words} words, "
+            f"floor {args.phrase_offset} lower)")
     say(f"Score floor:     {args.min_score}")
     say(f"Clues per word:  {args.clues_per_word}")
     say()
@@ -363,7 +481,7 @@ def curate(args):
     cut_shape = []
     for word, clues in raw.items():
         key = word.strip().upper()
-        if not (MIN_LEN <= len(key) <= MAX_LEN) or not LETTERS_ONLY.match(key):
+        if not (args.min_len <= len(key) <= args.max_len) or not LETTERS_ONLY.match(key):
             cut_shape.append(word)
             continue
         texts = [c.strip() for c in clues if c and c.strip()]
@@ -371,7 +489,7 @@ def curate(args):
             cut_shape.append(word)
             continue
         pool[key] = texts
-    say(f"1. Normalize (A-Z, {MIN_LEN}-{MAX_LEN} letters, >=1 clue)")
+    say(f"1. Normalize (A-Z, {args.min_len}-{args.max_len} letters, >=1 clue)")
     say(f"   kept {len(pool):,}   cut {len(cut_shape):,}")
     say(f"   {by_length(pool)}")
     if cut_shape:
@@ -415,23 +533,9 @@ def curate(args):
 
     # --- 3. Familiarity gate ------------------------------------------------
     zipf = frequency_lookup(args.freq_file)
+    floor_for = parse_zipf_spec(args.zipf)
     freqs = {w: zipf(w) for w in after_score}
 
-    cut_rare = []
-    after_freq = {}
-    for word, clues in after_score.items():
-        if word in allow or freqs[word] >= args.zipf:
-            after_freq[word] = clues
-        else:
-            cut_rare.append(word)
-    say(f"3. Familiarity gate (Zipf >= {args.zipf})")
-    say(f"   kept {len(after_freq):,}   cut {len(cut_rare):,}")
-    say(f"   {by_length(after_freq)}")
-    if cut_rare:
-        say(f"   cut: {sample(cut_rare)}")
-    say()
-
-    # --- 4. Drop non-words --------------------------------------------------
     surfaces = defaultdict(list)
     if args.surface:
         for entry in load_scored_list(args.surface):
@@ -439,6 +543,52 @@ def curate(args):
             if key:
                 surfaces[key].append(entry)
 
+    # Phrases. The clue list holds them glued together (ONTHEFENCE), which
+    # wordfreq scores 0, so they are scored from their spaced surface form
+    # instead. A phrase is judged against a floor `--phrase-offset` lower
+    # than a single word's: combined frequencies run low for good phrases.
+    phrases = {}
+    cut_fragments = []
+    if args.phrases:
+        for word in after_score:
+            candidates = phrase_surfaces(surfaces.get(word, []))
+            if not candidates:
+                continue
+            ok = [p for p in candidates if phrase_ok(p, args.max_phrase_words)]
+            if not ok:
+                cut_fragments.append(word)
+                continue
+            best = max(ok, key=zipf)
+            if zipf(best) > freqs[word]:
+                freqs[word] = zipf(best)
+                phrases[word] = best
+
+    def floor(word):
+        offset = args.phrase_offset if word in phrases else 0.0
+        return floor_for(len(word)) - offset
+
+    cut_rare = []
+    after_freq = {}
+    for word, clues in after_score.items():
+        if word in allow or freqs[word] >= floor(word):
+            after_freq[word] = clues
+        else:
+            cut_rare.append(word)
+    say(f"3. Familiarity gate (Zipf >= {args.zipf})")
+    if args.phrases:
+        say(f"   phrases scored from their spaced form: {len(phrases):,} "
+            f"(floor {args.phrase_offset} lower); "
+            f"{len(cut_fragments):,} cut as sentence fragments")
+        if cut_fragments:
+            say(f"   fragments: {sample(cut_fragments)}")
+    say(f"   kept {len(after_freq):,}   cut {len(cut_rare):,}")
+    say(f"   {by_length(after_freq)}")
+    if cut_rare:
+        say(f"   cut: {sample(cut_rare)}")
+    say()
+
+    # --- 4. Drop non-words --------------------------------------------------
+    foreign = foreign_lookup()
     cuts_by_reason = defaultdict(list)
     kept_proper = []
     after_shape = {}
@@ -446,7 +596,17 @@ def curate(args):
         if word in allow:
             after_shape[word] = clues
             continue
-        reason = classify(word, surfaces.get(word, []))
+        # A phrase that passed the fragment check is already judged; the
+        # multi-word rule below would only throw it back out.
+        reason = None if word in phrases else classify(word, surfaces.get(word, []))
+        if (reason is None and args.foreign_margin
+                and freqs[word] < args.foreign_max_en):
+            # JAMAISVU, SOTTOVOCE, MOLTOBENE: far more frequent in another
+            # language than in English. The margin is wide and English must
+            # be low, so VAN, DEN and PASTA survive.
+            forms = [word] + ([phrases[word]] if word in phrases else [])
+            if max(foreign(f) for f in forms) >= freqs[word] + args.foreign_margin:
+                reason = 'foreign'
         if reason == 'proper noun' and freqs[word] >= args.proper_zipf:
             # EARTH, APRIL, INDIA, PARIS, OHIO. A proper noun this common in
             # ordinary English is easier than most of the word list; dropping
@@ -525,6 +685,8 @@ def curate(args):
         json.dump(final, out, indent=None, separators=(',', ':'), sort_keys=True)
 
     if args.scores_out:
+        # Zipf per word. A generator picks its pool by threshold, so one
+        # file serves an easy day (high bar) and a hard day (low bar).
         tiers = {w: round(freqs.get(w, 0.0), 2) for w in final}
         with open(args.scores_out, 'w', encoding='utf-8') as out:
             json.dump(tiers, out, indent=None, separators=(',', ':'), sort_keys=True)
@@ -538,19 +700,32 @@ def curate(args):
     say(f"   {kept_clues:,} clues, {kept_clues / max(len(final), 1):.1f} per word")
     say()
 
-    # Enough words to fill? The solver gives up after 4,000 nodes per attempt.
+    # Enough words to fill? A grid needs a deep pool at every length it
+    # uses. Short words are what the long ones cross, so they matter most.
     counts = defaultdict(int)
     for w in final:
         counts[len(w)] += 1
-    for L in (4, 5):
-        if counts[L] < 1000:
-            say(f"   WARNING: only {counts[L]:,} words of length {L}. "
-                f"The 5x5 fill needs thousands, not hundreds.")
+    for L in range(args.min_len, args.max_len + 1):
+        if counts[L] < args.warn_below:
+            say(f"   WARNING: only {counts[L]:,} words of length {L} "
+                f"(warn below {args.warn_below:,}).")
     say()
 
+    if args.phrases:
+        kept_phrases = sorted(w for w in final if w in phrases)
+        say(f"Phrases kept: {len(kept_phrases):,}")
+        for L in sorted({len(w) for w in kept_phrases}):
+            n = sum(1 for w in kept_phrases if len(w) == L)
+            say(f"   len {L}: {n:,}")
+        say()
+        rng = random.Random(2)
+        for word in sorted(rng.sample(kept_phrases, min(40, len(kept_phrases)))):
+            say(f"   {word:<14} {phrases[word]:<24} {freqs[word]:.2f}  {final[word][0]}")
+        say()
+
     rng = random.Random(1)
-    for L in (3, 4, 5):
-        words = sorted(w for w in final if len(w) == L)
+    for L in range(args.min_len, args.max_len + 1):
+        words = sorted(w for w in final if len(w) == L and w not in phrases)
         if not words:
             continue
         say(f"Survivors, random sample of {L}-letter words")
@@ -560,10 +735,10 @@ def curate(args):
 
     near = sorted(
         ((freqs[w], w) for w in after_score
-         if abs(freqs[w] - args.zipf) <= NEAR_BAND),
+         if abs(freqs[w] - floor(w)) <= NEAR_BAND),
         reverse=True,
     )
-    say(f"At the threshold (Zipf {args.zipf - NEAR_BAND:.2f}-{args.zipf + NEAR_BAND:.2f}) "
+    say(f"At the threshold (+/-{NEAR_BAND} Zipf of each length's floor) "
         f"- review these to tune --zipf")
     say(f"   kept:    {', '.join(w for z, w in near if w in final)[:900]}")
     say(f"   dropped: {', '.join(w for z, w in near if w not in final)[:900]}")
@@ -590,8 +765,33 @@ def main():
                    help='Spread the Wordlist scored list, "ENTRY;score" lines')
     p.add_argument('--surface', default='spreadthewordlist_forms.dict',
                    help='Spread the Wordlist surface-forms edition')
-    p.add_argument('--zipf', type=float, default=3.5,
-                   help='Zipf frequency floor (default: 3.5)')
+    p.add_argument('--zipf', default='3.5',
+                   help='Zipf frequency floor: a number, or per length like '
+                        '"3-5:2.8,6-7:2.5,8-11:2.2" (default: 3.5)')
+    p.add_argument('--min-len', type=int, default=MIN_LEN,
+                   help=f'shortest answer (default: {MIN_LEN})')
+    p.add_argument('--max-len', type=int, default=MAX_LEN,
+                   help=f'longest answer (default: {MAX_LEN})')
+    p.add_argument('--phrases', action='store_true',
+                   help='keep common multi-word phrases (ONTHEFENCE), scored '
+                        'from their spaced form; fragments like "ate in" are '
+                        'dropped')
+    p.add_argument('--phrase-offset', type=float, default=0.5,
+                   help='phrases are held to a floor this much lower than '
+                        'single words (default: 0.5)')
+    p.add_argument('--foreign-margin', type=float, default=0.0,
+                   help='drop a word whose best Zipf in es/fr/it/de/pt/nl '
+                        'beats its English Zipf by this much (default: 0, off)')
+    p.add_argument('--foreign-max-en', type=float, default=3.5,
+                   help='...but only if its English Zipf is below this '
+                        '(default: 3.5)')
+    p.add_argument('--max-phrase-words', type=int, default=4,
+                   help='longest phrase kept, in words (default: 4)')
+    p.add_argument('--warn-below', type=int, default=1000,
+                   help='warn when a length has fewer words than this '
+                        '(default: 1000)')
+    p.add_argument('--title', default='Mini',
+                   help='name shown in the report header (default: Mini)')
     p.add_argument('--min-score', type=int, default=50,
                    help='Spread the Wordlist score floor (default: 50)')
     p.add_argument('--clues', dest='clues_per_word', type=int, default=12,
